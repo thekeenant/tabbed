@@ -2,9 +2,7 @@ package com.keenant.tabbed.util;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.keenant.tabbed.TabbedPlugin;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.entity.Player;

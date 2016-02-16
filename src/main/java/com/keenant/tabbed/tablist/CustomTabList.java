@@ -10,13 +10,10 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.keenant.tabbed.Tabbed;
-import com.keenant.tabbed.TabbedPlugin;
 import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.util.Packets;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 import org.bukkit.entity.Player;
 
@@ -197,7 +194,7 @@ public class CustomTabList extends TitledTabList {
         boolean skinChanged = oldItem == null || newItem.updateSkin();
         boolean textChanged = oldItem == null || newItem.updateText();
         boolean pingChanged = oldItem == null || newItem.updatePing();
-        
+
         if (skinChanged) {
             if (oldItem != null)
                 packets.add(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(index, oldItem)));

@@ -1,11 +1,8 @@
 package com.keenant.tabbed.tablist;
 
-import com.comphenix.protocol.events.PacketContainer;
 import com.keenant.tabbed.Tabbed;
-import com.keenant.tabbed.TabbedPlugin;
 import com.keenant.tabbed.item.PlayerTabItem;
 import com.keenant.tabbed.item.TabItem;
-import gnu.trove.impl.hash.TByteIntHash;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,7 +12,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 

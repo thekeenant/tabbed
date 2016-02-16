@@ -3,7 +3,6 @@ package com.keenant.tabbed.item;
 import com.keenant.tabbed.util.Skin;
 import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 import javax.annotation.Nonnull;

@@ -6,7 +6,6 @@ import com.keenant.tabbed.tablist.TabList;
 import com.keenant.tabbed.tablist.TitledTabList;
 import com.keenant.tabbed.tablist.table.TableTabList;
 import lombok.Getter;
-import org.bukkit.craftbukkit.libs.jline.internal.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 
 public class Tabbed implements Listener {

@@ -1,18 +1,15 @@
 package com.keenant.tabbed.tablist.table;
 
-import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
-import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.google.common.base.Preconditions;
 import com.keenant.tabbed.Tabbed;
-import com.keenant.tabbed.item.EmptyTabItem;
+import com.keenant.tabbed.item.BlankTabItem;
 import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.tablist.CustomTabList;
-import com.keenant.tabbed.util.Packets;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -25,6 +22,7 @@ public class TableTabList extends CustomTabList {
         super(tabbed, player);
         this.columns = columns;
         this.rows = getMinRows(columns);
+        reset();
     }
 
     @Override
@@ -53,6 +51,13 @@ public class TableTabList extends CustomTabList {
         return get(getIndex(cell));
     }
 
+    @Override
+    public TabItem get(int index) {
+        if (contains(index))
+            return super.get(index);
+        return new BlankTabItem(true);
+    }
+
     public TabItem set(int column, int row, TabItem item) {
         return set(new TabCell(column, row), item);
     }
@@ -74,31 +79,27 @@ public class TableTabList extends CustomTabList {
     }
 
     protected void updateTable(TabCell cell, TabItem newItem) {
-        this.update(getIndex(cell), newItem);
+        update(getIndex(cell), newItem);
     }
 
     protected void updateTable(Map<TabCell,TabItem> items) {
-
+        Map<Integer,TabItem> map = new HashMap<>();
+        for (Entry<TabCell,TabItem> entry : items.entrySet())
+            map.put(getIndex(entry.getKey()), entry.getValue());
+        update(map);
     }
 
     private void reset() {
-        PlayerInfoData[] data = new PlayerInfoData[this.columns * this.rows];
+        Map<TabCell,TabItem> items = new HashMap<>();
         for (int x = 0; x < this.columns; x++) {
             for (int y = 0; y < this.rows; y++) {
                 TabCell cell = new TabCell(x, y);
-                TabItem item = new EmptyTabItem(true);
-                int index = getIndex(cell);
-
-                if (this.contains(cell)) {
-                    PlayerInfoData remove = getPlayerInfoData(index, this.get(cell));
-                    Packets.send(this.player, PlayerInfoAction.REMOVE_PLAYER, remove);
-                }
-
-                data[index] = getPlayerInfoData(index, item);
+                TabItem item = new BlankTabItem(true);
+                items.put(cell, item);
             }
         }
-        this.clear();
-        Packets.send(this.player, PlayerInfoAction.ADD_PLAYER, Arrays.asList(data));
+        updateTable(items);
+        clear();
     }
 
     private static int getMinRows(int columns) {

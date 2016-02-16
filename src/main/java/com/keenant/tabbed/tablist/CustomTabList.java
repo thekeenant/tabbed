@@ -9,6 +9,7 @@ import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
+import com.google.common.collect.ImmutableMap;
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.TabbedPlugin;
 import com.keenant.tabbed.item.TabItem;
@@ -30,8 +31,45 @@ public class CustomTabList extends TitledTabList {
         this.packetListener = createPacketListener();
     }
 
-    protected void clear() {
-        this.items.clear();
+    public int getMaxItems() {
+        return 20 * 4;
+    }
+
+    @Override
+    public CustomTabList enable() {
+        super.enable();
+        registerListener();
+        return this;
+    }
+
+    @Override
+    public CustomTabList disable() {
+        super.disable();
+        unregisterListener();
+        return this;
+    }
+
+    public void add(TabItem item) {
+        add(getNextIndex(), item);
+    }
+
+    public void add(int index, TabItem item) {
+        TabbedPlugin.log("adding @ " + index);
+        update(index, item);
+    }
+
+    public void remove(int index) {
+        update(index, null);
+        this.items.remove(index);
+    }
+
+    public void remove(TabItem item) {
+        Iterator<Entry<Integer,TabItem>> iterator = this.items.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Entry<Integer,TabItem> entry = iterator.next();
+            if (entry.getValue().equals(item))
+                remove(entry.getKey());
+        }
     }
 
     public boolean contains(int index) {
@@ -40,6 +78,10 @@ public class CustomTabList extends TitledTabList {
 
     public TabItem get(int index) {
         return this.items.get(index);
+    }
+
+    protected void clear() {
+        this.items.clear();
     }
 
     protected boolean put(int index, TabItem item) {
@@ -59,33 +101,24 @@ public class CustomTabList extends TitledTabList {
         return result;
     }
 
-    public int getMaxItems() {
-        return 20 * 4;
+    protected void update(int index, TabItem newItem) {
+        update(ImmutableMap.of(index, newItem));
     }
 
-    @Override
-    public CustomTabList enable() {
-        super.enable();
-        registerListener();
-        return this;
+    protected void update(Map<Integer,TabItem> items) {
+        Map<Integer,TabItem> send = putAll(items);
+        Packets.send(this.player, getUpdate(send));
     }
 
-    @Override
-    public CustomTabList disable() {
-        super.disable();
-        unregisterListener();
-        return this;
-    }
-
-    protected List<PacketContainer> getUpdate(int index, TabItem newItem) {
-        TabItem oldItem = this.items.get(index);
+    private List<PacketContainer> getUpdate(int index, TabItem newItem) {
+        TabItem oldItem = get(index);
 
         if (newItem == null && oldItem != null) {
             TabbedPlugin.log("Removing @ " + index);
             return Collections.singletonList(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(index, oldItem)));
         }
 
-        List<PacketContainer> packets = new ArrayList<>();
+        List<PacketContainer> packets = new ArrayList<>(2);
 
         boolean skinChanged = oldItem == null || !oldItem.getSkin().equals(newItem.getSkin());
         boolean textChanged = oldItem == null || !oldItem.getText().equals(newItem.getText());
@@ -106,8 +139,8 @@ public class CustomTabList extends TitledTabList {
         return packets;
     }
 
-    protected List<PacketContainer> getUpdate(Map<Integer,TabItem> items) {
-        List<PacketContainer> all = new ArrayList<>();
+    private List<PacketContainer> getUpdate(Map<Integer,TabItem> items) {
+        List<PacketContainer> all = new ArrayList<>(items.size()  * 2);
 
         for (Entry<Integer,TabItem> entry : items.entrySet())
             all.addAll(getUpdate(entry.getKey(), entry.getValue()));
@@ -142,7 +175,7 @@ public class CustomTabList extends TitledTabList {
         return result;
     }
 
-    public PlayerInfoData getPlayerInfoData(int index, TabItem item) {
+    private PlayerInfoData getPlayerInfoData(int index, TabItem item) {
         WrappedGameProfile profile = getGameProfile(index, item.getSkin());
         return getPlayerInfoData(profile, item.getPing(), item.getText());
     }
@@ -205,40 +238,5 @@ public class CustomTabList extends TitledTabList {
                 return index;
         }
         return -1;
-    }
-
-    protected void update(int index, TabItem newItem) {
-        if (this.put(index, newItem)) {
-            TabbedPlugin.log("sending @ " + index);
-            Packets.send(this.player, getUpdate(index, newItem));
-        }
-    }
-
-    protected void update(Map<Integer,TabItem> items) {
-        Map<Integer,TabItem> send = this.putAll(items);
-        Packets.send(this.player, getUpdate(send));
-    }
-
-    public void add(TabItem item) {
-        add(getNextIndex(), item);
-    }
-
-    public void add(int index, TabItem item) {
-        TabbedPlugin.log("adding @ " + index);
-        update(index, item);
-    }
-
-    public void remove(int index) {
-        update(index, null);
-        this.items.remove(index);
-    }
-
-    public void remove(TabItem item) {
-        Iterator<Entry<Integer,TabItem>> iterator = this.items.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Entry<Integer,TabItem> entry = iterator.next();
-            if (entry.getValue().equals(item))
-                remove(entry.getKey());
-        }
     }
 }

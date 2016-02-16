@@ -29,9 +29,9 @@ public class TextTabItem implements TabItem {
         this.text = text;
         this.ping = ping;
         this.skin = skin;
-        updateText();
-        updatePing();
-        updateSkin();
+        this.newText = text;
+        this.newPing = ping;
+        this.newSkin = skin;
     }
 
     private void setText(@Nonnull String text) {

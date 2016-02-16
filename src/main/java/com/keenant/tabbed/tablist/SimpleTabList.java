@@ -40,7 +40,7 @@ public class SimpleTabList extends TitledTabList {
     public SimpleTabList(Tabbed tabbed, Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
         super(player);
         Preconditions.checkArgument(maxItems < MAXIMUM_ITEMS, "maxItems cannot exceed client maximum of " + MAXIMUM_ITEMS);
-        Preconditions.checkArgument(minColumnWidth <= maxColumnWidth, "minColumnWidth cannot be greater than maxColumnWidth");
+        Preconditions.checkArgument(minColumnWidth <= maxColumnWidth || maxColumnWidth < 0, "minColumnWidth cannot be greater than maxColumnWidth");
 
         this.tabbed = tabbed;
         this.maxItems = maxItems < 0 ? MAXIMUM_ITEMS : maxItems;

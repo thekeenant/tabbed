@@ -9,16 +9,22 @@ import org.bukkit.entity.Player;
 @ToString
 public class PlayerTabItem implements TabItem {
     @Getter private final Player player;
-    @Getter private final PlayerTextProvider textProvider;
-    @Getter private final PlayerSkinProvider skinProvider;
+    @Getter private final PlayerProvider<String> textProvider;
+    @Getter private final PlayerProvider<Skin> skinProvider;
+    @Getter private String text;
+    @Getter private int ping;
+    @Getter private Skin skin;
 
-    public PlayerTabItem(Player player, PlayerTextProvider textProvider, PlayerSkinProvider skinProvider) {
+    public PlayerTabItem(Player player, PlayerProvider<String> textProvider, PlayerProvider<Skin> skinProvider) {
         this.player = player;
         this.textProvider = textProvider;
         this.skinProvider = skinProvider;
+        updateText();
+        updatePing();
+        updateSkin();
     }
 
-    public PlayerTabItem(Player player, PlayerTextProvider textProvider) {
+    public PlayerTabItem(Player player, PlayerProvider textProvider) {
         this(player, textProvider, SKIN_PROVIDER);
     }
 
@@ -27,12 +33,30 @@ public class PlayerTabItem implements TabItem {
     }
 
     @Override
-    public String getText() {
-        return this.player.getPlayerListName();
+    public boolean updateText() {
+        String newText = this.textProvider.get(this.player);
+        boolean update = !newText.equals(this.text);
+        this.text = newText;
+        return update;
     }
 
     @Override
-    public int getPing() {
+    public boolean updatePing() {
+        int newPing = getNewPing();
+        boolean update = newPing != ping;
+        ping = newPing;
+        return update;
+    }
+
+    @Override
+    public boolean updateSkin() {
+        Skin newSkin = this.skinProvider.get(this.player);
+        boolean update = !newSkin.equals(this.skin);
+        this.skin = newSkin;
+        return update;
+    }
+
+    private int getNewPing() {
         try {
             Object craftPlayer = Reflection.getHandle(this.player);
             return craftPlayer.getClass().getDeclaredField("ping").getInt(craftPlayer);
@@ -41,44 +65,35 @@ public class PlayerTabItem implements TabItem {
         }
     }
 
-    @Override
-    public Skin getSkin() {
-        return this.skinProvider.getSkin(this.player);
-    }
-
-    private static PlayerTextProvider NAME_PROVIDER = new PlayerTextProvider() {
+    private static PlayerProvider<String> NAME_PROVIDER = new PlayerProvider<String>() {
         @Override
-        public String getText(Player player) {
+        public String get(Player player) {
             return player.getName();
         }
     };
 
-    private static PlayerTextProvider DISPLAY_NAME_PROVIDER = new PlayerTextProvider() {
+    private static PlayerProvider<String> DISPLAY_NAME_PROVIDER = new PlayerProvider<String>() {
         @Override
-        public String getText(Player player) {
+        public String get(Player player) {
             return player.getDisplayName();
         }
     };
 
-    private static PlayerTextProvider LIST_NAME_PROVIDER = new PlayerTextProvider() {
+    private static PlayerProvider<String> LIST_NAME_PROVIDER = new PlayerProvider<String>() {
         @Override
-        public String getText(Player player) {
+        public String get(Player player) {
             return player.getPlayerListName();
         }
     };
 
-    private static PlayerSkinProvider SKIN_PROVIDER = new PlayerSkinProvider() {
+    private static PlayerProvider<Skin> SKIN_PROVIDER = new PlayerProvider<Skin>() {
         @Override
-        public Skin getSkin(Player player) {
+        public Skin get(Player player) {
             return new Skin(player);
         }
     };
 
-    public interface PlayerTextProvider {
-        String getText(Player player);
-    }
-
-    public interface PlayerSkinProvider {
-        Skin getSkin(Player player);
+    public interface PlayerProvider<T> {
+        T get(Player player);
     }
 }

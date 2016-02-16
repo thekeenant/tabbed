@@ -10,6 +10,8 @@ import lombok.ToString;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -75,6 +77,22 @@ public class TableTabList extends CustomTabList {
         for (Entry<TabCell,TabItem> entry : items.entrySet())
             validateCell(entry.getKey());
         updateTable(items);
+    }
+
+    public boolean set(TabCell cellFrom, TabCell cellTo, List<TabItem> items) {
+        Map<TabCell,TabItem> map = new HashMap<>();
+        Iterator<TabItem> iterator = items.iterator();
+
+        for (int x = cellFrom.getColumn(); x <= cellTo.getColumn(); x++) {
+            for (int y = cellFrom.getRow(); y <= cellTo.getRow(); y++) {
+                if (iterator.hasNext()) {
+                    map.put(new TabCell(x, y), iterator.next());
+                }
+            }
+        }
+        set(map);
+
+        return !iterator.hasNext();
     }
 
     protected void updateTable(TabCell cell, TabItem newItem) {

@@ -8,4 +8,10 @@ public interface TabItem {
     int getPing();
 
     Skin getSkin();
+
+    boolean updateText();
+
+    boolean updatePing();
+
+    boolean updateSkin();
 }

@@ -27,12 +27,15 @@ import java.util.Map.Entry;
 public class CustomTabList extends TitledTabList {
     public static int MAXIMUM_ITEMS = 4 * 20; // client maximum is 4x20 (4 columns, 20 rows)
 
-    private final Tabbed tabbed;
-    private final Map<Integer,TabItem> items;
+    protected final Tabbed tabbed;
+    protected final Map<Integer,TabItem> items;
     private final PacketListener packetListener;
     private final int maxItems;
     private final int minColumnWidth;
     private final int maxColumnWidth;
+
+    private int updaterId;
+    private final Runnable updater;
 
     @Getter boolean batchEnabled;
     private final Map<Integer,TabItem> clientItems;
@@ -43,10 +46,16 @@ public class CustomTabList extends TitledTabList {
         Preconditions.checkArgument(minColumnWidth <= maxColumnWidth, "minColumnWidth cannot be greater than maxColumnWidth");
 
         this.tabbed = tabbed;
-        this.maxItems = maxItems;
+        this.maxItems = maxItems < 0 ? MAXIMUM_ITEMS : maxItems;
         this.minColumnWidth = minColumnWidth;
         this.maxColumnWidth = maxColumnWidth;
         this.clientItems = new HashMap<>();
+        this.updater = new Runnable() {
+            @Override
+            public void run() {
+                update(items);
+            }
+        };
 
         this.items = new HashMap<>();
         this.packetListener = createPacketListener();
@@ -60,6 +69,7 @@ public class CustomTabList extends TitledTabList {
     public CustomTabList enable() {
         super.enable();
         registerListener();
+        this.updaterId = this.tabbed.getPlugin().getServer().getScheduler().scheduleSyncRepeatingTask(this.tabbed.getPlugin(), this.updater, 0, 20);
         return this;
     }
 
@@ -67,6 +77,7 @@ public class CustomTabList extends TitledTabList {
     public CustomTabList disable() {
         super.disable();
         unregisterListener();
+        this.tabbed.getPlugin().getServer().getScheduler().cancelTask(updaterId);
         return this;
     }
 
@@ -87,10 +98,22 @@ public class CustomTabList extends TitledTabList {
     }
 
     public void add(TabItem item) {
-        add(getNextIndex(), item);
+        set(getNextIndex(), item);
     }
 
     public void add(int index, TabItem item) {
+        Map<Integer,TabItem> map = new HashMap<>();
+        for (int i = index; i < getMaxItems(); i++) {
+            if (!contains(i))
+                break;
+            TabItem move = get(i);
+            map.put(i + 1, move);
+        }
+        map.put(index, item);
+        update(map);
+    }
+
+    public void set(int index, TabItem item) {
         update(index, item);
     }
 
@@ -137,8 +160,16 @@ public class CustomTabList extends TitledTabList {
         return result;
     }
 
+    protected void update(int index) {
+        Map<Integer,TabItem> map = new HashMap<>();
+        map.put(index, get(index));
+        update(map);
+    }
+
     protected void update(int index, TabItem newItem) {
-        update(ImmutableMap.of(index, newItem));
+        Map<Integer,TabItem> map = new HashMap<>();
+        map.put(index, newItem);
+        update(map);
     }
 
     protected void update(Map<Integer,TabItem> items) {
@@ -163,10 +194,10 @@ public class CustomTabList extends TitledTabList {
 
         List<PacketContainer> packets = new ArrayList<>(2);
 
-        boolean skinChanged = oldItem == null || !oldItem.getSkin().equals(newItem.getSkin());
-        boolean textChanged = oldItem == null || !oldItem.getText().equals(newItem.getText());
-        boolean pingChanged = oldItem == null || oldItem.getPing() != newItem.getPing();
-
+        boolean skinChanged = oldItem == null || newItem.updateSkin();
+        boolean textChanged = oldItem == null || newItem.updateText();
+        boolean pingChanged = oldItem == null || newItem.updatePing();
+        
         if (skinChanged) {
             if (oldItem != null)
                 packets.add(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(index, oldItem)));
@@ -285,7 +316,7 @@ public class CustomTabList extends TitledTabList {
         };
     }
 
-    private int getNextIndex() {
+    public int getNextIndex() {
         for (int index = 0; index < getMaxItems(); index++) {
             if (!contains(index))
                 return index;

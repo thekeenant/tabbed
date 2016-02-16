@@ -1,16 +1,11 @@
 package com.keenant.tabbed;
 
-import com.keenant.tabbed.item.TextTabItem;
-import com.keenant.tabbed.tablist.CustomTabList;
-import com.keenant.tabbed.util.Skins;
+import com.keenant.tabbed.tablist.DefaultTabList;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Random;
-import java.util.UUID;
 
 public class TabbedPlugin extends JavaPlugin implements Listener {
     private Tabbed tabbed;
@@ -27,14 +22,17 @@ public class TabbedPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        CustomTabList tablist = tabbed.newCustomTabList(event.getPlayer(), 40);
+        DefaultTabList tablist = new DefaultTabList(tabbed, event.getPlayer(), -1);
+        tablist.enable();
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        CustomTabList tablist = (CustomTabList) tabbed.getTabList(event.getPlayer());
-
-        for (int i = 0; i < 40; i++)
-            tablist.add(i, new TextTabItem(UUID.randomUUID().toString().substring(0, 6), 50, Skins.getColoredSkins().get(new Random().nextInt(14))));
+    public void onAsyncChat(final AsyncPlayerChatEvent event) {
+        getServer().getScheduler().runTask(this, new Runnable() {
+            @Override
+            public void run() {
+                event.getPlayer().setPlayerListName(event.getMessage());
+            }
+        });
     }
 }

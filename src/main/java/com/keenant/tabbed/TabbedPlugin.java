@@ -27,23 +27,14 @@ public class TabbedPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        CustomTabList tablist = tabbed.newCustomTabList(event.getPlayer());
-
-        tablist.setHeader("Testing");
-
-//        tablist.set(0, 0, new TextTabItem("0,0"));
-//        tablist.set(1, 1, new TextTabItem("1,1"));
-//        tablist.set(2, 2, new TextTabItem("2,2"));
-//
-//        tablist.set(0, 1, new PlayerTabItem(event.getPlayer()));
-//        tablist.set(0, 2, new PlayerTabItem(event.getPlayer()));
-//        tablist.set(0, 3, new PlayerTabItem(event.getPlayer()));
+        CustomTabList tablist = tabbed.newCustomTabList(event.getPlayer(), 40);
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         CustomTabList tablist = (CustomTabList) tabbed.getTabList(event.getPlayer());
 
-        tablist.add(new TextTabItem(UUID.randomUUID().toString().substring(0, 6), 50, Skins.getColoredSkins().get(new Random().nextInt(14))));
+        for (int i = 0; i < 40; i++)
+            tablist.add(i, new TextTabItem(UUID.randomUUID().toString().substring(0, 6), 50, Skins.getColoredSkins().get(new Random().nextInt(14))));
     }
 }

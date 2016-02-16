@@ -1,13 +1,15 @@
 package com.keenant.tabbed.item;
 
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
+import com.keenant.tabbed.util.Skin;
 import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
+import lombok.ToString;
 
+@ToString
 public class TextTabItem implements TabItem {
-    @Getter private String text;
-    @Getter private int ping;
-    @Getter private WrappedSignedProperty skin;
+    @Getter private final String text;
+    @Getter private final int ping;
+    @Getter private final Skin skin;
 
     public TextTabItem(String text) {
         this(text, 1000);
@@ -17,7 +19,7 @@ public class TextTabItem implements TabItem {
         this(text, ping, Skins.getDefaultSkin());
     }
 
-    public TextTabItem(String text, int ping, WrappedSignedProperty skin) {
+    public TextTabItem(String text, int ping, Skin skin) {
         this.text = text;
         this.ping = ping;
         this.skin = skin;

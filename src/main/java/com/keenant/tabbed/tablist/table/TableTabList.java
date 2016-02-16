@@ -18,11 +18,10 @@ public class TableTabList extends CustomTabList {
     @Getter private final int columns;
     @Getter private final int rows;
 
-    public TableTabList(Tabbed tabbed, Player player, int columns) {
-        super(tabbed, player);
+    public TableTabList(Tabbed tabbed, Player player, int columns, int minColumnWidth, int maxColumnWidth) {
+        super(tabbed, player, -1, minColumnWidth, maxColumnWidth);
         this.columns = columns;
         this.rows = getMinRows(columns);
-        reset();
     }
 
     @Override
@@ -55,7 +54,7 @@ public class TableTabList extends CustomTabList {
     public TabItem get(int index) {
         if (contains(index))
             return super.get(index);
-        return new BlankTabItem(true);
+        return new BlankTabItem();
     }
 
     public TabItem set(int column, int row, TabItem item) {
@@ -94,7 +93,7 @@ public class TableTabList extends CustomTabList {
         for (int x = 0; x < this.columns; x++) {
             for (int y = 0; y < this.rows; y++) {
                 TabCell cell = new TabCell(x, y);
-                TabItem item = new BlankTabItem(true);
+                TabItem item = new BlankTabItem();
                 items.put(cell, item);
             }
         }

@@ -234,7 +234,7 @@ public class CustomTabList extends TitledTabList {
 
     private int getNextIndex() {
         for (int index = 0; index < getMaxItems(); index++) {
-            if (!this.items.containsKey(index))
+            if (!contains(index))
                 return index;
         }
         return -1;

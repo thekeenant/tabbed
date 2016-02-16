@@ -1,8 +1,9 @@
 package com.keenant.tabbed;
 
 import com.google.common.base.Preconditions;
-import com.keenant.tabbed.tablist.*;
-import com.keenant.tabbed.tablist.table.BatchTableTabList;
+import com.keenant.tabbed.tablist.CustomTabList;
+import com.keenant.tabbed.tablist.TabList;
+import com.keenant.tabbed.tablist.TitledTabList;
 import com.keenant.tabbed.tablist.table.TableTabList;
 import lombok.Getter;
 import org.bukkit.craftbukkit.libs.jline.internal.Nullable;
@@ -41,9 +42,5 @@ public class Tabbed {
 
     public TableTabList newTableTabList(Player player, int columns) {
         return put(player, new TableTabList(this, player, columns).enable());
-    }
-
-    public BatchTableTabList newBatchTableTabList(Player player, int columns) {
-        return put(player, new BatchTableTabList(this, player, columns).enable());
     }
 }

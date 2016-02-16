@@ -14,25 +14,35 @@ import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.TabbedPlugin;
 import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.util.Packets;
+import lombok.ToString;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.Map.Entry;
 
+@ToString(exclude = "tabbed")
 public class CustomTabList extends TitledTabList {
     private final Tabbed tabbed;
     private final HashMap<Integer,TabItem> items;
     private final PacketListener packetListener;
+    private final int maxItems;
 
-    public CustomTabList(Tabbed tabbed, Player player) {
+    public CustomTabList(Tabbed tabbed, Player player, int maxItems) {
         super(player);
         this.tabbed = tabbed;
+        this.maxItems = maxItems;
+
         this.items = new HashMap<>();
         this.packetListener = createPacketListener();
     }
 
+    public CustomTabList(Tabbed tabbed, Player player) {
+        // client maximum is 4x20 (4 columns, 20 rows)
+        this(tabbed, player, 4 * 20);
+    }
+
     public int getMaxItems() {
-        return 20 * 4;
+        return maxItems;
     }
 
     @Override
@@ -237,6 +247,7 @@ public class CustomTabList extends TitledTabList {
             if (!contains(index))
                 return index;
         }
+        // tablist is full
         return -1;
     }
 }

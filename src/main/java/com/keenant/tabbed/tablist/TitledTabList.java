@@ -5,10 +5,12 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import lombok.Getter;
+import lombok.ToString;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
 
+@ToString
 public class TitledTabList extends TabList {
     @Getter private String header;
     @Getter private String footer;

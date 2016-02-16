@@ -1,0 +1,7 @@
+name: Tabbed
+description: Custom tablist.
+main: com.keenant.tabbed.TabbedPlugin
+version: 1.0
+authors: [thekeenant]
+depend: [ProtocolLib]
+website: https://github.com/thekeenant/Tabbed

@@ -9,27 +9,27 @@ import lombok.Getter;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class PlayerTabItem implements TabItem {
-    @Getter private final TabList tabList;
     @Getter private final Player player;
     @Getter private final WrappedGameProfile profile;
 
-    public PlayerTabItem(TabList tabList, Player player) {
-        this.tabList = tabList;
+    public PlayerTabItem(Player player) {
         this.player = player;
         this.profile = WrappedGameProfile.fromPlayer(player);
     }
 
     @Override
     public String getText() {
-        return this.player.getDisplayName();
+        return this.player.getPlayerListName();
     }
 
     @Override
     public int getPing() {
         try {
-            return Reflection.getHandle(this.player).getClass().getDeclaredField("ping").getInt(this.player);
+            Object craftPlayer = Reflection.getHandle(this.player);
+            return craftPlayer.getClass().getDeclaredField("ping").getInt(craftPlayer);
         } catch (Exception e) {
             throw new RuntimeException("couldn't get player ping", e);
         }
@@ -37,8 +37,7 @@ public class PlayerTabItem implements TabItem {
 
     @Override
     public WrappedSignedProperty getSkin() {
-        Collection<WrappedSignedProperty> properties = this.profile.getProperties().get("texture");
-
+        Collection<WrappedSignedProperty> properties = this.profile.getProperties().get("textures");
         if (properties != null && properties.size() > 0)
             return properties.iterator().next();
         return Skins.getDefaultSkin();

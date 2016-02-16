@@ -10,4 +10,9 @@ import lombok.EqualsAndHashCode;
 public class TabCell {
     private int column;
     private int row;
+
+    @Override
+    public String toString() {
+        return column + "," + row;
+    }
 }

@@ -1,4 +1,4 @@
-package com.keenant.tabbed;
+package com.keenant.tabbed.tablist.table;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

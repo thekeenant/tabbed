@@ -2,22 +2,26 @@ package com.keenant.tabbed.item;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
-import com.keenant.tabbed.TabList;
 import com.keenant.tabbed.util.Reflection;
 import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
-import java.util.UUID;
 
 public class PlayerTabItem implements TabItem {
     @Getter private final Player player;
     @Getter private final WrappedGameProfile profile;
+    @Getter private final PlayerTextProvider textProvider;
 
-    public PlayerTabItem(Player player) {
+    public PlayerTabItem(Player player, PlayerTextProvider textProvider) {
         this.player = player;
         this.profile = WrappedGameProfile.fromPlayer(player);
+        this.textProvider = textProvider;
+    }
+
+    public PlayerTabItem(Player player) {
+        this(player, LIST_NAME_PROVIDER);
     }
 
     @Override
@@ -41,5 +45,16 @@ public class PlayerTabItem implements TabItem {
         if (properties != null && properties.size() > 0)
             return properties.iterator().next();
         return Skins.getDefaultSkin();
+    }
+
+    private static PlayerTextProvider LIST_NAME_PROVIDER = new PlayerTextProvider() {
+        @Override
+        public String getText(Player player) {
+            return player.getPlayerListName();
+        }
+    };
+
+    public interface PlayerTextProvider {
+        String getText(Player player);
     }
 }

@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 @ToString(exclude = "tabbed")
-public class CustomTabList extends TitledTabList {
+public class SimpleTabList extends TitledTabList {
     public static int MAXIMUM_ITEMS = 4 * 20; // client maximum is 4x20 (4 columns, 20 rows)
 
     protected final Tabbed tabbed;
@@ -37,7 +37,7 @@ public class CustomTabList extends TitledTabList {
     @Getter boolean batchEnabled;
     private final Map<Integer,TabItem> clientItems;
 
-    public CustomTabList(Tabbed tabbed, Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
+    public SimpleTabList(Tabbed tabbed, Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
         super(player);
         Preconditions.checkArgument(maxItems < MAXIMUM_ITEMS, "maxItems cannot exceed client maximum of " + MAXIMUM_ITEMS);
         Preconditions.checkArgument(minColumnWidth <= maxColumnWidth, "minColumnWidth cannot be greater than maxColumnWidth");
@@ -63,7 +63,7 @@ public class CustomTabList extends TitledTabList {
     }
 
     @Override
-    public CustomTabList enable() {
+    public SimpleTabList enable() {
         super.enable();
         registerListener();
         this.updaterId = this.tabbed.getPlugin().getServer().getScheduler().scheduleSyncRepeatingTask(this.tabbed.getPlugin(), this.updater, 0, 20);
@@ -71,7 +71,7 @@ public class CustomTabList extends TitledTabList {
     }
 
     @Override
-    public CustomTabList disable() {
+    public SimpleTabList disable() {
         super.disable();
         unregisterListener();
         this.tabbed.getPlugin().getServer().getScheduler().cancelTask(updaterId);

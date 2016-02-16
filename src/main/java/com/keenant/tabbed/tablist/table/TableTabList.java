@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.item.BlankTabItem;
 import com.keenant.tabbed.item.TabItem;
-import com.keenant.tabbed.tablist.CustomTabList;
+import com.keenant.tabbed.tablist.SimpleTabList;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.entity.Player;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 @ToString
-public class TableTabList extends CustomTabList {
+public class TableTabList extends SimpleTabList {
     @Getter private final int columns;
     @Getter private final int rows;
 

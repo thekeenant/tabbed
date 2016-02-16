@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public final class DefaultTabList extends CustomTabList implements Listener {
+public final class DefaultTabList extends SimpleTabList implements Listener {
     private Map<Player,String> names = new HashMap<>();
 
     private int taskId;

@@ -1,7 +1,7 @@
 package com.keenant.tabbed;
 
 import com.google.common.base.Preconditions;
-import com.keenant.tabbed.tablist.CustomTabList;
+import com.keenant.tabbed.tablist.SimpleTabList;
 import com.keenant.tabbed.tablist.TabList;
 import com.keenant.tabbed.tablist.TitledTabList;
 import com.keenant.tabbed.tablist.table.TableTabList;
@@ -58,8 +58,8 @@ public class Tabbed implements Listener {
      * @param player
      * @return
      */
-    public CustomTabList newCustomTabList(Player player) {
-        return newCustomTabList(player, CustomTabList.MAXIMUM_ITEMS);
+    public SimpleTabList newSimpleTabList(Player player) {
+        return newSimpleTabList(player, SimpleTabList.MAXIMUM_ITEMS);
     }
 
     /**
@@ -68,8 +68,8 @@ public class Tabbed implements Listener {
      * @param maxItems
      * @return
      */
-    public CustomTabList newCustomTabList(Player player, int maxItems) {
-        return newCustomTabList(player, maxItems, -1);
+    public SimpleTabList newSimpleTabList(Player player, int maxItems) {
+        return newSimpleTabList(player, maxItems, -1);
     }
 
     /**
@@ -79,8 +79,8 @@ public class Tabbed implements Listener {
      * @param minColumnWidth
      * @return
      */
-    public CustomTabList newCustomTabList(Player player, int maxItems, int minColumnWidth) {
-        return newCustomTabList(player, maxItems, minColumnWidth, -1);
+    public SimpleTabList newSimpleTabList(Player player, int maxItems, int minColumnWidth) {
+        return newSimpleTabList(player, maxItems, minColumnWidth, -1);
     }
 
     /**
@@ -91,8 +91,8 @@ public class Tabbed implements Listener {
      * @param maxColumnWidth
      * @return
      */
-    public CustomTabList newCustomTabList(Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
-        return put(player, new CustomTabList(this, player, maxItems, minColumnWidth, maxColumnWidth).enable());
+    public SimpleTabList newSimpleTabList(Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
+        return put(player, new SimpleTabList(this, player, maxItems, minColumnWidth, maxColumnWidth).enable());
     }
 
     /**

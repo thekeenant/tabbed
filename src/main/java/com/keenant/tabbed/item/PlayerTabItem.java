@@ -1,23 +1,25 @@
 package com.keenant.tabbed.item;
 
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.keenant.tabbed.util.Reflection;
-import com.keenant.tabbed.util.Skins;
+import com.keenant.tabbed.util.Skin;
 import lombok.Getter;
+import lombok.ToString;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-
+@ToString
 public class PlayerTabItem implements TabItem {
     @Getter private final Player player;
-    @Getter private final WrappedGameProfile profile;
     @Getter private final PlayerTextProvider textProvider;
+    @Getter private final PlayerSkinProvider skinProvider;
+
+    public PlayerTabItem(Player player, PlayerTextProvider textProvider, PlayerSkinProvider skinProvider) {
+        this.player = player;
+        this.textProvider = textProvider;
+        this.skinProvider = skinProvider;
+    }
 
     public PlayerTabItem(Player player, PlayerTextProvider textProvider) {
-        this.player = player;
-        this.profile = WrappedGameProfile.fromPlayer(player);
-        this.textProvider = textProvider;
+        this(player, textProvider, SKIN_PROVIDER);
     }
 
     public PlayerTabItem(Player player) {
@@ -40,12 +42,23 @@ public class PlayerTabItem implements TabItem {
     }
 
     @Override
-    public WrappedSignedProperty getSkin() {
-        Collection<WrappedSignedProperty> properties = this.profile.getProperties().get("textures");
-        if (properties != null && properties.size() > 0)
-            return properties.iterator().next();
-        return Skins.getDefaultSkin();
+    public Skin getSkin() {
+        return this.skinProvider.getSkin(this.player);
     }
+
+    private static PlayerTextProvider NAME_PROVIDER = new PlayerTextProvider() {
+        @Override
+        public String getText(Player player) {
+            return player.getName();
+        }
+    };
+
+    private static PlayerTextProvider DISPLAY_NAME_PROVIDER = new PlayerTextProvider() {
+        @Override
+        public String getText(Player player) {
+            return player.getDisplayName();
+        }
+    };
 
     private static PlayerTextProvider LIST_NAME_PROVIDER = new PlayerTextProvider() {
         @Override
@@ -54,7 +67,18 @@ public class PlayerTabItem implements TabItem {
         }
     };
 
+    private static PlayerSkinProvider SKIN_PROVIDER = new PlayerSkinProvider() {
+        @Override
+        public Skin getSkin(Player player) {
+            return new Skin(player);
+        }
+    };
+
     public interface PlayerTextProvider {
         String getText(Player player);
+    }
+
+    public interface PlayerSkinProvider {
+        Skin getSkin(Player player);
     }
 }

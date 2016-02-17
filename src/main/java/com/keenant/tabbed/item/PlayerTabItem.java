@@ -34,7 +34,7 @@ public class PlayerTabItem implements TabItem {
 
     @Override
     public boolean updateText() {
-        if (!this.player.isOnline())
+        if (!this.player.isOnline() || !this.player.isValid())
             return false;
 
         String newText = this.textProvider.get(this.player);
@@ -45,7 +45,7 @@ public class PlayerTabItem implements TabItem {
 
     @Override
     public boolean updatePing() {
-        if (!this.player.isOnline())
+        if (!this.player.isOnline() || !this.player.isValid())
             return false;
 
         int newPing = getNewPing();
@@ -56,7 +56,7 @@ public class PlayerTabItem implements TabItem {
 
     @Override
     public boolean updateSkin() {
-        if (!this.player.isOnline())
+        if (!this.player.isOnline() || !this.player.isValid())
             return false;
 
         Skin newSkin = this.skinProvider.get(this.player);

@@ -136,6 +136,28 @@ public class SimpleTabList extends TitledTabList {
         return this.items.get(index);
     }
 
+    public void update() {
+        update(this.items);
+    }
+
+    public void update(int index) {
+        Map<Integer,TabItem> map = new HashMap<>();
+        map.put(index, get(index));
+        update(map);
+    }
+
+    public void update(int index, TabItem newItem) {
+        Map<Integer,TabItem> map = new HashMap<>();
+        map.put(index, newItem);
+        update(map);
+    }
+
+    public void update(Map<Integer,TabItem> items) {
+        Map<Integer,TabItem> oldItems = new HashMap<>();
+        oldItems.putAll(this.items);
+        update(oldItems, items, false);
+    }
+
     protected void clear() {
         this.items.clear();
     }
@@ -155,24 +177,6 @@ public class SimpleTabList extends TitledTabList {
             if (put(entry.getKey(), entry.getValue()))
                 result.put(entry.getKey(), entry.getValue());
         return result;
-    }
-
-    protected void update(int index) {
-        Map<Integer,TabItem> map = new HashMap<>();
-        map.put(index, get(index));
-        update(map);
-    }
-
-    protected void update(int index, TabItem newItem) {
-        Map<Integer,TabItem> map = new HashMap<>();
-        map.put(index, newItem);
-        update(map);
-    }
-
-    protected void update(Map<Integer,TabItem> items) {
-        Map<Integer,TabItem> oldItems = new HashMap<>();
-        oldItems.putAll(this.items);
-        update(oldItems, items, false);
     }
 
     private void update(Map<Integer,TabItem> oldItems, Map<Integer,TabItem> items, boolean isBatch) {

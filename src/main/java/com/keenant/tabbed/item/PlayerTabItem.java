@@ -24,7 +24,7 @@ public class PlayerTabItem implements TabItem {
         updateSkin();
     }
 
-    public PlayerTabItem(Player player, PlayerProvider textProvider) {
+    public PlayerTabItem(Player player, PlayerProvider<String> textProvider) {
         this(player, textProvider, SKIN_PROVIDER);
     }
 
@@ -34,6 +34,9 @@ public class PlayerTabItem implements TabItem {
 
     @Override
     public boolean updateText() {
+        if (!this.player.isOnline())
+            return false;
+
         String newText = this.textProvider.get(this.player);
         boolean update = !newText.equals(this.text);
         this.text = newText;
@@ -42,6 +45,9 @@ public class PlayerTabItem implements TabItem {
 
     @Override
     public boolean updatePing() {
+        if (!this.player.isOnline())
+            return false;
+
         int newPing = getNewPing();
         boolean update = newPing != ping;
         ping = newPing;
@@ -50,6 +56,9 @@ public class PlayerTabItem implements TabItem {
 
     @Override
     public boolean updateSkin() {
+        if (!this.player.isOnline())
+            return false;
+
         Skin newSkin = this.skinProvider.get(this.player);
         boolean update = !newSkin.equals(this.skin);
         this.skin = newSkin;

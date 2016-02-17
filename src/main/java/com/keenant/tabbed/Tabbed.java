@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 
@@ -38,10 +39,17 @@ public class Tabbed implements Listener {
         return this.tabLists.get(player);
     }
 
-    private <T extends TabList> T put(Player player, T tabList) {
-        Preconditions.checkArgument(!this.tabLists.containsKey(player), "player '" + player.getName() + "' already has a tablist");
-        this.tabLists.put(player, tabList);
-        return tabList;
+    @Nullable
+    public TabList destroyTabList(Player player) {
+        TabList tabList = getTabList(player);
+        if (tabList == null)
+            return null;
+        return tabList.disable();
+    }
+
+    @Nullable
+    public TabList destroyTabList(@Nonnull TabList tabList) {
+        return destroyTabList(tabList.getPlayer());
     }
 
     /**
@@ -135,5 +143,11 @@ public class Tabbed implements Listener {
      */
     public TableTabList newTableTabList(Player player, int columns, int minColumnWidth, int maxColumnWidth) {
         return put(player, new TableTabList(this, player, columns, minColumnWidth, maxColumnWidth).enable());
+    }
+
+    private <T extends TabList> T put(Player player, T tabList) {
+        Preconditions.checkArgument(!this.tabLists.containsKey(player), "player '" + player.getName() + "' already has a tablist");
+        this.tabLists.put(player, tabList);
+        return tabList;
     }
 }

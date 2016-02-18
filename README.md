@@ -60,6 +60,7 @@ Now you can start creating cool tablists!
 ## Things to know!
 
 * Tab lists are associated per player. This means you must create a new tab list every time a user joins (`PlayerJoinEvent` works just fine).
+* You can get a player's tab list with `tabbed.getTabList(player)`
 * `update()` is called on tablists every second. This simply checks for updates to dynamic elements that exist in tab items (such as player pings). You can manually call it if you so desire (such as if you call `setPlayerListName()` and wish to update their tab item
 immediately).
 

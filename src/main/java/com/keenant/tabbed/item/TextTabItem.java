@@ -34,15 +34,15 @@ public class TextTabItem implements TabItem {
         this.newSkin = skin;
     }
 
-    private void setText(@Nonnull String text) {
+    public void setText(@Nonnull String text) {
         this.newText = text;
     }
 
-    private void setPing(int ping) {
+    public void setPing(int ping) {
         this.newPing = ping;
     }
 
-    private void setSkin(@Nonnull Skin skin) {
+    public void setSkin(@Nonnull Skin skin) {
         this.newSkin = skin;
     }
 

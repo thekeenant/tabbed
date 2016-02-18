@@ -1,6 +1,7 @@
 package com.keenant.tabbed;
 
 import com.google.common.base.Preconditions;
+import com.keenant.tabbed.tablist.DefaultTabList;
 import com.keenant.tabbed.tablist.SimpleTabList;
 import com.keenant.tabbed.tablist.TabList;
 import com.keenant.tabbed.tablist.TitledTabList;
@@ -59,6 +60,15 @@ public class Tabbed implements Listener {
      */
     public TitledTabList newTitledTabList(Player player) {
         return put(player, new TitledTabList(player).enable());
+    }
+
+    /**
+     * Creates a new DefaultTabList.
+     * @param player
+     * @return
+     */
+    public DefaultTabList newDefaultTabList(Player player) {
+        return put(player, new DefaultTabList(this, player, -1).enable());
     }
 
     /**

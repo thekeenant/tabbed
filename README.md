@@ -62,6 +62,36 @@ immediately).
 
 Now you can start creating cool tablists!
 
+
+### TitledTabList
+
+This tab list doesn't modify the behavior of the items in the tab list, it jus allows you to change the header and footer. **All
+tab lists `extend TitledTabList` which means you can access these methods no matter the tab list type.**
+
+**Constructor:**
+```java
+tabbed.newTitledTabList(player);
+```
+
+**Usage:**
+```java
+TitledTabList tab = tabbed.newTitledTabList(player);
+tab.setHeader("The tab list header!");
+tab.setFooter("The tab list footer :O");
+
+// Better to send this (one packet)
+tab.setHeaderFooter("The tab list header!", "The tab list footer :O");
+
+// Reset
+tab.resetHeader();
+tab.resetFooter();
+tab.resetHeaderFooter();
+
+// Getters
+String header = tab.getHeader();
+String footer = tab.getFooter();
+```
+
 ### TableTabList
 
 This tablist behaves like a table with a specified number of columns and rows. You can set specific items at a column and row. Cells
@@ -107,7 +137,6 @@ tab.add(0, item); // inserts to first position
 tab.set(0, item); // removes item at index 0, inserts this one
 tab.get(4); // gets the item at index 4
 ```
-
 
 ### DefaultTabList
 This is just an example of how to implement your own custom tablist. It appears identical to vanilla Minecraft. There's usually no reason you should use this, it's just a demonstration you can find [here](https://github.com/thekeenant/Tabbed/blob/master/src/main/java/com/keenant/tabbed/tablist/DefaultTabList.java).

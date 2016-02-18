@@ -1,5 +1,6 @@
 package com.keenant.tabbed.item;
 
+import com.keenant.tabbed.TabItem;
 import com.keenant.tabbed.util.Skin;
 import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
@@ -7,6 +8,9 @@ import lombok.ToString;
 
 import javax.annotation.Nonnull;
 
+/**
+ * A tab item with custom text, ping and skin.
+ */
 @ToString
 public class TextTabItem implements TabItem {
     @Getter private String text;

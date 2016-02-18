@@ -10,7 +10,17 @@ public abstract class TabList {
         this.player = player;
     }
 
+    /**
+     * Enables the tab list, starts any necessary listeners/schedules.
+     * @param <T>
+     * @return
+     */
     public abstract <T extends TabList> T enable();
 
+    /**
+     * Disables the tab list: stops existing listeners/schedules.
+     * @param <T>
+     * @return
+     */
     public abstract <T extends TabList> T disable();
 }

@@ -1,11 +1,15 @@
 package com.keenant.tabbed.item;
 
+import com.keenant.tabbed.TabItem;
 import com.keenant.tabbed.util.Reflection;
 import com.keenant.tabbed.util.Skin;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.entity.Player;
 
+/**
+ * A tab item that represents a player.
+ */
 @ToString
 public class PlayerTabItem implements TabItem {
     @Getter private final Player player;

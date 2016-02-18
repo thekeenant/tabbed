@@ -10,8 +10,9 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.base.Preconditions;
+import com.keenant.tabbed.CustomTabList;
 import com.keenant.tabbed.Tabbed;
-import com.keenant.tabbed.item.TabItem;
+import com.keenant.tabbed.TabItem;
 import com.keenant.tabbed.util.Packets;
 import lombok.Getter;
 import lombok.ToString;
@@ -20,8 +21,11 @@ import org.bukkit.entity.Player;
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * A simple implementation of TabList.
+ */
 @ToString(exclude = "tabbed")
-public class SimpleTabList extends TitledTabList {
+public class SimpleTabList extends TitledTabList implements CustomTabList {
     public static int MAXIMUM_ITEMS = 4 * 20; // client maximum is 4x20 (4 columns, 20 rows)
 
     protected final Tabbed tabbed;
@@ -78,14 +82,35 @@ public class SimpleTabList extends TitledTabList {
         return this;
     }
 
+    /**
+     * Sends the batch update to the player and resets the batch.
+     */
     public void batchUpdate() {
+        if (!this.batchEnabled)
+            throw new UnsupportedOperationException("cannot batch update when batch is not enabled, call setBachEnabled(true) first");
         update(this.clientItems, this.items, true);
-        this.clientItems.clear();
-        this.clientItems.putAll(this.items);
+        batchReset();
     }
 
+    /**
+     * Reset the existing batch.
+     */
+    public void batchReset() {
+        if (!this.batchEnabled)
+            throw new UnsupportedOperationException("cannot reset batch when batch is not enabled, call setBachEnabled(true) first");
+        this.items.clear();
+        this.items.putAll(this.clientItems);
+    }
+
+    /**
+     * Enable batch processing of tab items. Modifications to the tab list
+     * will not be sent to the client until {@link #batchUpdate()} is called.
+     * @param batchEnabled
+     */
     public void setBatchEnabled(boolean batchEnabled) {
-        if (this.batchEnabled && !batchEnabled && !this.clientItems.equals(this.items))
+        if (this.batchEnabled == batchEnabled)
+            return;
+        if (this.batchEnabled && !this.clientItems.equals(this.items))
             throw new RuntimeException("cannot disable batch before batchUpdate() called");
         this.batchEnabled = batchEnabled;
         this.clientItems.clear();
@@ -99,6 +124,7 @@ public class SimpleTabList extends TitledTabList {
     }
 
     public void add(int index, TabItem item) {
+        validateIndex(index);
         Map<Integer,TabItem> map = new HashMap<>();
         for (int i = index; i < getMaxItems(); i++) {
             if (!contains(i))
@@ -110,29 +136,36 @@ public class SimpleTabList extends TitledTabList {
         update(map);
     }
 
-    public void set(int index, TabItem item) {
+    public TabItem set(int index, TabItem item) {
+        validateIndex(index);
+        TabItem current = get(index);
         update(index, item);
+        return current;
     }
 
-    public void remove(int index) {
+    public TabItem remove(int index) {
+        validateIndex(index);
         update(index, null);
-        this.items.remove(index);
+        return this.items.remove(index);
     }
 
-    public void remove(TabItem item) {
+    public <T extends TabItem> T remove(T item) {
         Iterator<Entry<Integer,TabItem>> iterator = this.items.entrySet().iterator();
         while (iterator.hasNext()) {
             Entry<Integer,TabItem> entry = iterator.next();
             if (entry.getValue().equals(item))
                 remove(entry.getKey());
         }
+        return item;
     }
 
     public boolean contains(int index) {
+        validateIndex(index);
         return this.items.containsKey(index);
     }
 
     public TabItem get(int index) {
+        validateIndex(index);
         return this.items.get(index);
     }
 
@@ -146,23 +179,32 @@ public class SimpleTabList extends TitledTabList {
         update(map);
     }
 
-    public void update(int index, TabItem newItem) {
+    public int getNextIndex() {
+        for (int index = 0; index < getMaxItems(); index++) {
+            if (!contains(index))
+                return index;
+        }
+        // tablist is full
+        return -1;
+    }
+
+    protected void update(int index, TabItem newItem) {
         Map<Integer,TabItem> map = new HashMap<>();
         map.put(index, newItem);
         update(map);
     }
 
-    public void update(Map<Integer,TabItem> items) {
+    protected void update(Map<Integer,TabItem> items) {
         Map<Integer,TabItem> oldItems = new HashMap<>();
         oldItems.putAll(this.items);
         update(oldItems, items, false);
     }
 
-    protected void clear() {
-        this.items.clear();
+    private void validateIndex(int index) {
+        Preconditions.checkArgument(index < 0 || index >= getMaxItems(), "index not in allowed range");
     }
 
-    protected boolean put(int index, TabItem item) {
+    private boolean put(int index, TabItem item) {
         if (index < 0 || index >= getMaxItems())
             return false;
         if (item == null)
@@ -171,7 +213,7 @@ public class SimpleTabList extends TitledTabList {
         return true;
     }
 
-    protected Map<Integer,TabItem> putAll(Map<Integer,TabItem> items) {
+    private Map<Integer,TabItem> putAll(Map<Integer,TabItem> items) {
         HashMap<Integer,TabItem> result = new HashMap<>(items.size());
         for (Entry<Integer,TabItem> entry : items.entrySet())
             if (put(entry.getKey(), entry.getValue()))
@@ -315,14 +357,5 @@ public class SimpleTabList extends TitledTabList {
                     packet.getPlayerInfoDataLists().write(0, newData);
             }
         };
-    }
-
-    public int getNextIndex() {
-        for (int index = 0; index < getMaxItems(); index++) {
-            if (!contains(index))
-                return index;
-        }
-        // tablist is full
-        return -1;
     }
 }

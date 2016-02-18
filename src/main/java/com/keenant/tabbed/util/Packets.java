@@ -23,18 +23,6 @@ public class Packets {
         return packet;
     }
 
-    public static void send(Player player, PlayerInfoAction action, PlayerInfoData data) {
-        send(player, getPacket(action, data));
-    }
-
-    public static void send(Player player, PlayerInfoAction action, List<PlayerInfoData> data) {
-        send(player, getPacket(action, data));
-    }
-
-    public static void send(Player player, PacketContainer packet) {
-        send(player, Collections.singletonList(packet));
-    }
-
     public static void send(Player player, List<PacketContainer> packets) {
         try {
             for (PacketContainer packet : packets)

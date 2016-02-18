@@ -123,6 +123,7 @@ and what is being sent. Tabbed doesn't know, on the other hand, when you are sen
 int i = 0;
 for (Player player : Bukkit.getOnlinePlayers()) {
     tabbed.set(i, new PlayerTabItem(player));
+    i++;
 }
 ```
 It will send up to `2 * Bukkit.getOnlinePlayers().length` packets to the player (update name + ping). This might cause some blinking for the client. It is smarter to batch send these packets and reduce it to a maximum of `4` packets sent like so:

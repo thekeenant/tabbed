@@ -57,6 +57,12 @@ new BlankTabItem(Skins.getSkin(ChatColor.RED);
 
 Now you can start creating cool tablists!
 
+## Things to know!
+
+* Tab lists are associated per player. This means you must create a new tab list every time a user joins (`PlayerJoinEvent` works just fine).
+* `update()` is called on tablists every second. This simply checks for updates to dynamic elements that exist in tab items (such as player pings). You can manually call it if you so desire (such as if you call `setPlayerListName()` and wish to update their tab item
+immediately).
+
 ## TableTabList
 
 This tablist behaves like a table with a specified number of columns and rows. You can set specific items at a column and row. Cells
@@ -80,6 +86,7 @@ tab.set(0, 0, item); // top left
 tab.set(new TabCell(0, 0), item); // an alias of the previous
 
 TabItem item = tab.get(0, 0);
+TabItem item = tab.get(new TabCell(0, 0));
 
 tab.remove(0, 0);
 ```
@@ -92,9 +99,9 @@ This behaves similarly to how the normal tablist behaves. You can simply add or 
 
 ```java
 tabbed.newSimpleTabList(player);
-tabbed.newSimpleTabList(player, 20); // limits item count to 20
-tabbed.newSimpleTabList(player, 20, 5); // items with fewer than 5 characters have spaces amended to them
-tabbed.newSimpleTabList(player, 20, 5, 10); // items with more than 10 chars are stripped to 10.
+tabbed.newSimpleTabList(player, maxItems); // limits item count (default is MC maximum, aka 80 or 4x20)
+tabbed.newSimpleTabList(player, maxItems, minColumnWidth); // add spaces to items until min width
+tabbed.newSimpleTabList(player, maxItems, minColumnWidth, maxColumnWidth); // remove characters until max width
 ```
 
 **Usage:**

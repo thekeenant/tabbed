@@ -4,6 +4,7 @@ Tabbed is a Bukkit API for configuring the tablist to the desire of any plugin d
 
 **Dependencies:**
 * Any derivative of Spigot 1.8 ([PaperSpigot!](https://tcpr.ca/downloads/paperspigot))
+* [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/)
 
 **Demonstration:**
 

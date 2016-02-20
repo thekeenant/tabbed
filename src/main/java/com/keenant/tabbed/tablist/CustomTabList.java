@@ -1,10 +1,13 @@
 package com.keenant.tabbed.tablist;
 
-import com.keenant.tabbed.TabItem;
+import com.keenant.tabbed.item.TabItem;
 
 import javax.annotation.Nullable;
 
-public interface CustomTabList {
+/**
+ * Represents a tab list that can have custom and dynamic TabItem's.
+ */
+public interface CustomTabList extends TabList {
     /**
      * @return The maximum number of items supported.
      */

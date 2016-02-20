@@ -10,8 +10,8 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.base.Preconditions;
+import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.Tabbed;
-import com.keenant.tabbed.TabItem;
 import com.keenant.tabbed.util.Packets;
 import lombok.Getter;
 import lombok.ToString;
@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * A simple implementation of TabList.
+ * A simple implementation of a custom tab list that supports batch updates.
  */
 @ToString(exclude = "tabbed")
 public class SimpleTabList extends TitledTabList implements CustomTabList {

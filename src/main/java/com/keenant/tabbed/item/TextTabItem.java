@@ -1,6 +1,5 @@
 package com.keenant.tabbed.item;
 
-import com.keenant.tabbed.TabItem;
 import com.keenant.tabbed.util.Skin;
 import com.keenant.tabbed.util.Skins;
 import lombok.Getter;

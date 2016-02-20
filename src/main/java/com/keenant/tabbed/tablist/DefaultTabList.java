@@ -1,8 +1,8 @@
 package com.keenant.tabbed.tablist;
 
+import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.item.PlayerTabItem;
-import com.keenant.tabbed.TabItem;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,30 +25,6 @@ public final class DefaultTabList extends SimpleTabList implements Listener {
 
     public DefaultTabList(Tabbed tabbed, Player player, int maxItems) {
         super(tabbed, player, maxItems, -1, -1);
-    }
-
-    @Override
-    @Deprecated
-    public void add(TabItem item) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @Deprecated
-    public void add(int index, TabItem item) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @Deprecated
-    public TabItem set(int index, TabItem item) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @Deprecated
-    public TabItem remove(int index) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -98,11 +74,11 @@ public final class DefaultTabList extends SimpleTabList implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerQuitEvent event) {
-        super.remove(getTabItemIndex(event.getPlayer()));
+        remove(getTabItemIndex(event.getPlayer()));
     }
 
     private void addPlayer(Player player) {
-        super.add(getInsertLocation(player), new PlayerTabItem(player));
+        add(getInsertLocation(player), new PlayerTabItem(player));
         this.names.put(player, player.getPlayerListName());
     }
 

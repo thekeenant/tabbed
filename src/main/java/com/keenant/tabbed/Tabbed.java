@@ -1,11 +1,7 @@
 package com.keenant.tabbed;
 
 import com.google.common.base.Preconditions;
-import com.keenant.tabbed.tablist.DefaultTabList;
-import com.keenant.tabbed.tablist.SimpleTabList;
-import com.keenant.tabbed.tablist.TabList;
-import com.keenant.tabbed.tablist.TitledTabList;
-import com.keenant.tabbed.tablist.TableTabList;
+import com.keenant.tabbed.tablist.*;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,15 +13,29 @@ import org.bukkit.plugin.Plugin;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Tabbed implements Listener {
+    private static Map<Plugin,Tabbed> instances = new HashMap<>();
+
     @Getter private final Plugin plugin;
-    private final HashMap<Player,TabList> tabLists;
+    private final Map<Player,TabList> tabLists;
 
     public Tabbed(Plugin plugin) {
         this.plugin = plugin;
         this.tabLists = new HashMap<>();
         this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
+        instances.put(plugin, this);
+    }
+
+    /**
+     * Gets an instance of Tabbed from a plugin.
+     * @param plugin
+     * @return
+     */
+    @Nullable
+    public static Tabbed getTabbed(Plugin plugin) {
+        return instances.get(plugin);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

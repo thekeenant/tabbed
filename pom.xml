@@ -6,7 +6,7 @@
 
     <groupId>com.keenant</groupId>
     <artifactId>tabbed</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5</version>
 
     <!-- Deployment -->
     <distributionManagement>

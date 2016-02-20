@@ -10,13 +10,17 @@ import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * A very basic tab list. It doesn't modify the items, only the header/footer.
+ */
 @ToString
-public class TitledTabList extends TabList {
+public class TitledTabList implements TabList {
+    @Getter protected final Player player;
     @Getter private String header;
     @Getter private String footer;
 
     public TitledTabList(Player player) {
-        super(player);
+        this.player = player;
     }
 
     @Override

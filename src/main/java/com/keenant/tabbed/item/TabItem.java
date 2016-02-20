@@ -1,20 +1,26 @@
-package com.keenant.tabbed;
+package com.keenant.tabbed.item;
 
 import com.keenant.tabbed.util.Skin;
 
+/**
+ * Represents a custom tab item.
+ */
 public interface TabItem {
     /**
-     * @return The text of the tab item (any length, recommended less than ~18).
+     * The text of the tab item (any length, recommended less than ~18). No calculations should be made.
+     * @return
      */
     String getText();
 
     /**
-     * @return The ping of the tab item.
+     * The ping of the tab item. No calculations should be made.
+     * @return
      */
     int getPing();
 
     /**
-     * @return The skin/avatar of the tab item.
+     * The skin/avatar of the tab item. No calculations should be made.
+     * @return
      */
     Skin getSkin();
 

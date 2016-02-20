@@ -1,18 +1,25 @@
 package com.keenant.tabbed.tablist;
 
 import com.google.common.base.Preconditions;
+import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.item.BlankTabItem;
-import com.keenant.tabbed.TabItem;
 import lombok.*;
-import org.apache.commons.lang.mutable.MutableInt;
-import org.bukkit.craftbukkit.libs.jline.internal.Nullable;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * An implementation of SimpleTabList that behaves like an HTML/CSS table.
+ * It has columns and rows where (0,0) is the top left and (columns - 1, rows - 1)
+ * is the top right.
+ *
+ * It supports some fancy operations like filling a portion of the table
+ * in any direction.
+ */
 @ToString
 public class TableTabList extends SimpleTabList {
     @Getter private final int columns;
@@ -286,6 +293,9 @@ public class TableTabList extends SimpleTabList {
         }
     }
 
+    /**
+     * Represents an area of the table.
+     */
     @ToString
     @EqualsAndHashCode
     public static class TableBox {
@@ -384,6 +394,9 @@ public class TableTabList extends SimpleTabList {
         BOTTOM_LEFT
     }
 
+    /**
+     * Represents a direction in which to fill an area.
+     */
     public enum FillDirection {
         HORIZONTAL,
         VERTICAL,

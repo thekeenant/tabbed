@@ -35,7 +35,7 @@ new PlayerTabItem(player, PlayerTabItem.LIST_NAME_PROVIDER);
 new PlayerTabItem(player, PlayerTabItem.LIST_NAME_PROVIDER, PlayerTabItem.SKIN_PROVIDER);
 
 new PlayerTabItem(player, PlayerTabItem.DISPLAY_NAME_PROVIDER);
-new PlayerTabItem(player, PlayerTabItem.DISPLAY_NAME_PROVIDER, Skins.getSkin(ChatColor.RED));
+new PlayerTabItem(player, PlayerTabItem.DISPLAY_NAME_PROVIDER, Skins.getDot(ChatColor.RED));
 
 new PlayerTabItem(player, new PlayerProvider<String>() {
     @Override
@@ -46,10 +46,11 @@ new PlayerTabItem(player, new PlayerProvider<String>() {
 
 // TextTabItem
 new TextTabItem("Some text!", 1000); // ping = 1,000 in this case
-new TextTabItem("Some text!", 1000, Skins.getDefaultSkin());
+new TextTabItem("Some text!", 1000, Skins.DEFAULT_SKIN);
 
-new TextTabItem("Red skin :D", 0, Skins.getSkin(ChatColor.RED));
-new TextTabItem("Yellow skin :O", 0, Skins.getSkin(ChatColor.YELLOW));
+new TextTabItem("Red skin :D", 0, Skins.getDot(ChatColor.RED));
+new TextTabItem("Yellow skin :O", 0, Skins.getDot(ChatColor.YELLOW));
+new TextTabItem("An Enderman!", 0, Skins.getMob(EntityType.ENDERMAN));
 
 // BlankTabItem
 new BlankTabItem(Skins.getSkin(ChatColor.RED);

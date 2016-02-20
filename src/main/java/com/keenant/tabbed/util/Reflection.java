@@ -3,6 +3,9 @@ package com.keenant.tabbed.util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+/**
+ * Reflection util.
+ */
 public class Reflection {
     public static Object getHandle(Player player) {
         try {

@@ -5,6 +5,9 @@ import org.bukkit.ChatColor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Some Skin utils.
+ */
 public class Skins {
     private static List<Skin> coloredSkins;
     private static Skin defaultSkin;

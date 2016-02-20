@@ -47,6 +47,13 @@ public class TableTabList extends SimpleTabList {
     }
 
     @Override
+    public TabItem remove(int index) {
+        TabItem prev = get(index);
+        set(index, new BlankTabItem());
+        return prev;
+    }
+
+    @Override
     public TableTabList enable() {
         super.enable();
         reset();
@@ -133,6 +140,23 @@ public class TableTabList extends SimpleTabList {
             indexItems.put(getIndex(entry.getKey()), entry.getValue());
 
         super.set(indexItems);
+    }
+
+    /**
+     * Remove an item by column/row.
+     * @param column
+     * @param row
+     */
+    public void remove(int column, int row) {
+        remove(getIndex(column, row));
+    }
+
+    /**
+     * Remove an item by table cell.
+     * @param cell
+     */
+    public void remove(TableCell cell) {
+        remove(cell.getColumn(), cell.getRow());
     }
 
     /**

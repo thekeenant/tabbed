@@ -1,6 +1,9 @@
 # Tabbed
 
-Tabbed is a Bukkit API for configuring the tablist to the desire of any plugin developer!
+![http://i.imgur.com/ftS7FkG.png](http://i.imgur.com/ftS7FkG.png)
+
+Tabbed is a Bukkit API for configuring the tablist to the desire of any plugin developer! Make tab lists the
+way in which you always desired.
 
 **Dependencies:**
 * Any derivative of Spigot 1.8 ([PaperSpigot!](https://tcpr.ca/downloads/paperspigot))
@@ -110,12 +113,21 @@ tabbed.newTableTabList(player, columns, minColumnWidth, maxColumnWidth);
 TableTabList tab = tabbed.newTableTabList(player);
 tab.set(col, row, item);
 tab.set(0, 0, item); // top left
-tab.set(new TabCell(0, 0), item); // an alias of the previous
+tab.set(new TableCell(0, 0), item); // an alias of the previous
 
 TabItem item = tab.get(0, 0);
-TabItem item = tab.get(new TabCell(0, 0));
+TabItem item = tab.get(new TableCell(0, 0));
 
 tab.remove(0, 0);
+tab.remove(new TableCell(0,0)); // same thing
+
+// Fill a box
+List<TabItem> items = new ArrayList<TabItem>();
+items.add(new TextTabItem("This will be at 0,0"));
+items.add(new TextTabItem("This will be at 1,0"));
+items.add(new TextTabItem("This will be at 0,1"));
+items.add(new TextTabItem("This will be at 1,1"));
+tab.fill(0, 0, 1, 1, items, TableCorner.TOP_LEFT, FillDirection.HORIZONTAL);
 ```
 
 ### SimpleTabList

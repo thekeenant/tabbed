@@ -11,17 +11,21 @@ import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.base.Preconditions;
 import com.keenant.tabbed.Tabbed;
-import com.keenant.tabbed.item.TabItem;
+import com.keenant.tabbed.TabItem;
 import com.keenant.tabbed.util.Packets;
 import lombok.Getter;
 import lombok.ToString;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * A simple implementation of TabList.
+ */
 @ToString(exclude = "tabbed")
-public class SimpleTabList extends TitledTabList {
+public class SimpleTabList extends TitledTabList implements CustomTabList {
     public static int MAXIMUM_ITEMS = 4 * 20; // client maximum is 4x20 (4 columns, 20 rows)
 
     protected final Tabbed tabbed;
@@ -39,7 +43,7 @@ public class SimpleTabList extends TitledTabList {
 
     public SimpleTabList(Tabbed tabbed, Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
         super(player);
-        Preconditions.checkArgument(maxItems < MAXIMUM_ITEMS, "maxItems cannot exceed client maximum of " + MAXIMUM_ITEMS);
+        Preconditions.checkArgument(maxItems <= MAXIMUM_ITEMS, "maxItems cannot exceed client maximum of " + MAXIMUM_ITEMS);
         Preconditions.checkArgument(minColumnWidth <= maxColumnWidth || maxColumnWidth < 0, "minColumnWidth cannot be greater than maxColumnWidth");
 
         this.tabbed = tabbed;
@@ -50,7 +54,7 @@ public class SimpleTabList extends TitledTabList {
         this.updater = new Runnable() {
             @Override
             public void run() {
-                update(items);
+                update(items, items);
             }
         };
 
@@ -64,6 +68,11 @@ public class SimpleTabList extends TitledTabList {
 
     @Override
     public SimpleTabList enable() {
+        List<PacketContainer> packets = new ArrayList<>();
+        for (Player target : Bukkit.getOnlinePlayers())
+            packets.add(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(WrappedGameProfile.fromPlayer(target), 0, null)));
+        Packets.send(this.player, packets);
+
         super.enable();
         registerListener();
         this.updaterId = this.tabbed.getPlugin().getServer().getScheduler().scheduleSyncRepeatingTask(this.tabbed.getPlugin(), this.updater, 0, 20);
@@ -78,14 +87,35 @@ public class SimpleTabList extends TitledTabList {
         return this;
     }
 
+    /**
+     * Sends the batch update to the player and resets the batch.
+     */
     public void batchUpdate() {
+        if (!this.batchEnabled)
+            throw new UnsupportedOperationException("cannot batch update when batch is not enabled, call setBachEnabled(true) first");
         update(this.clientItems, this.items, true);
-        this.clientItems.clear();
-        this.clientItems.putAll(this.items);
+        batchReset();
     }
 
+    /**
+     * Reset the existing batch.
+     */
+    public void batchReset() {
+        if (!this.batchEnabled)
+            throw new UnsupportedOperationException("cannot reset batch when batch is not enabled, call setBachEnabled(true) first");
+        this.items.clear();
+        this.items.putAll(this.clientItems);
+    }
+
+    /**
+     * Enable batch processing of tab items. Modifications to the tab list
+     * will not be sent to the client until {@link #batchUpdate()} is called.
+     * @param batchEnabled
+     */
     public void setBatchEnabled(boolean batchEnabled) {
-        if (this.batchEnabled && !batchEnabled && !this.clientItems.equals(this.items))
+        if (this.batchEnabled == batchEnabled)
+            return;
+        if (this.batchEnabled && !this.clientItems.equals(this.items))
             throw new RuntimeException("cannot disable batch before batchUpdate() called");
         this.batchEnabled = batchEnabled;
         this.clientItems.clear();
@@ -99,6 +129,10 @@ public class SimpleTabList extends TitledTabList {
     }
 
     public void add(int index, TabItem item) {
+        validateIndex(index);
+        Map<Integer,TabItem> current = new HashMap<>();
+        current.putAll(this.items);
+
         Map<Integer,TabItem> map = new HashMap<>();
         for (int i = index; i < getMaxItems(); i++) {
             if (!contains(i))
@@ -107,62 +141,91 @@ public class SimpleTabList extends TitledTabList {
             map.put(i + 1, move);
         }
         map.put(index, item);
-        update(map);
+        update(current, map);
     }
 
-    public void set(int index, TabItem item) {
-        update(index, item);
+    public TabItem set(int index, TabItem item) {
+        Map<Integer,TabItem> items = new HashMap<>(1);
+        items.put(index, item);
+        return set(items).get(index);
     }
 
-    public void remove(int index) {
-        update(index, null);
-        this.items.remove(index);
+    public Map<Integer,TabItem> set(Map<Integer,TabItem> items) {
+        for (Entry<Integer,TabItem> entry : items.entrySet())
+            validateIndex(entry.getKey());
+
+        Map<Integer,TabItem> oldItems = new HashMap<>();
+        oldItems.putAll(this.items);
+        update(oldItems, items);
+
+        return oldItems;
     }
 
-    public void remove(TabItem item) {
+    public TabItem remove(int index) {
+        validateIndex(index);
+        TabItem removed = this.items.remove(index);
+        update(index, removed, null);
+        return removed;
+    }
+
+    public <T extends TabItem> T remove(T item) {
         Iterator<Entry<Integer,TabItem>> iterator = this.items.entrySet().iterator();
         while (iterator.hasNext()) {
             Entry<Integer,TabItem> entry = iterator.next();
             if (entry.getValue().equals(item))
                 remove(entry.getKey());
         }
+        return item;
     }
 
     public boolean contains(int index) {
+        validateIndex(index);
         return this.items.containsKey(index);
     }
 
     public TabItem get(int index) {
+        validateIndex(index);
         return this.items.get(index);
     }
 
     public void update() {
-        update(this.items);
+        update(this.items, this.items);
     }
 
     public void update(int index) {
         Map<Integer,TabItem> map = new HashMap<>();
         map.put(index, get(index));
-        update(map);
+        update(index, get(index), get(index));
     }
 
-    public void update(int index, TabItem newItem) {
-        Map<Integer,TabItem> map = new HashMap<>();
-        map.put(index, newItem);
-        update(map);
+    public int getNextIndex() {
+        for (int index = 0; index < getMaxItems(); index++) {
+            if (!contains(index))
+                return index;
+        }
+        // tablist is full
+        return -1;
     }
 
-    public void update(Map<Integer,TabItem> items) {
-        Map<Integer,TabItem> oldItems = new HashMap<>();
-        oldItems.putAll(this.items);
+    protected void update(int index, TabItem oldItem, TabItem newItem) {
+        Map<Integer,TabItem> oldItems = new HashMap<>(1);
+        oldItems.put(index, oldItem);
+
+        Map<Integer,TabItem> newItems = new HashMap<>(1);
+        newItems.put(index, newItem);
+
+        update(oldItems, newItems);
+    }
+
+    protected void update(Map<Integer,TabItem> oldItems, Map<Integer,TabItem> items) {
         update(oldItems, items, false);
     }
 
-    protected void clear() {
-        this.items.clear();
+    private void validateIndex(int index) {
+        Preconditions.checkArgument(index > 0 || index < getMaxItems(), "index not in allowed range");
     }
 
-    protected boolean put(int index, TabItem item) {
+    private boolean put(int index, TabItem item) {
         if (index < 0 || index >= getMaxItems())
             return false;
         if (item == null)
@@ -171,7 +234,7 @@ public class SimpleTabList extends TitledTabList {
         return true;
     }
 
-    protected Map<Integer,TabItem> putAll(Map<Integer,TabItem> items) {
+    private Map<Integer,TabItem> putAll(Map<Integer,TabItem> items) {
         HashMap<Integer,TabItem> result = new HashMap<>(items.size());
         for (Entry<Integer,TabItem> entry : items.entrySet())
             if (put(entry.getKey(), entry.getValue()))
@@ -195,7 +258,7 @@ public class SimpleTabList extends TitledTabList {
 
         List<PacketContainer> packets = new ArrayList<>(2);
 
-        boolean skinChanged = oldItem == null || newItem.updateSkin();
+        boolean skinChanged = oldItem == null || !oldItem.equals(newItem) || newItem.updateSkin();
         boolean textChanged = oldItem == null || newItem.updateText();
         boolean pingChanged = oldItem == null || newItem.updatePing();
 
@@ -257,16 +320,18 @@ public class SimpleTabList extends TitledTabList {
     }
 
     private PlayerInfoData getPlayerInfoData(WrappedGameProfile profile, int ping, String displayName) {
-        // min width
-        while (displayName.length() < this.minColumnWidth)
-            displayName += " ";
+        if (displayName != null) {
+            // min width
+            while (displayName.length() < this.minColumnWidth)
+                displayName += " ";
 
-        // max width
-        if (this.maxColumnWidth > 0)
-            while (displayName.length() > this.maxColumnWidth)
-                displayName = displayName.substring(0, displayName.length() - 1);
+            // max width
+            if (this.maxColumnWidth > 0)
+                while (displayName.length() > this.maxColumnWidth)
+                    displayName = displayName.substring(0, displayName.length() - 1);
+        }
 
-        return new PlayerInfoData(profile, ping, NativeGameMode.NOT_SET, WrappedChatComponent.fromText(displayName));
+        return new PlayerInfoData(profile, ping, NativeGameMode.NOT_SET, displayName == null ? null : WrappedChatComponent.fromText(displayName));
     }
 
     private WrappedGameProfile getGameProfile(int index, WrappedSignedProperty skin) {
@@ -315,14 +380,5 @@ public class SimpleTabList extends TitledTabList {
                     packet.getPlayerInfoDataLists().write(0, newData);
             }
         };
-    }
-
-    public int getNextIndex() {
-        for (int index = 0; index < getMaxItems(); index++) {
-            if (!contains(index))
-                return index;
-        }
-        // tablist is full
-        return -1;
     }
 }

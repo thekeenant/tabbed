@@ -5,7 +5,7 @@ import com.keenant.tabbed.tablist.DefaultTabList;
 import com.keenant.tabbed.tablist.SimpleTabList;
 import com.keenant.tabbed.tablist.TabList;
 import com.keenant.tabbed.tablist.TitledTabList;
-import com.keenant.tabbed.tablist.table.TableTabList;
+import com.keenant.tabbed.tablist.TableTabList;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,24 +30,38 @@ public class Tabbed implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        TabList tabList = tabLists.remove(event.getPlayer());
-        if (tabList != null)
-            tabList.disable();
+        destroyTabList(event.getPlayer());
     }
 
+    /**
+     * Get the current tab list of the player.
+     * @param player
+     * @return The tab list, or null if it wasn't present.
+     */
     @Nullable
     public TabList getTabList(Player player) {
         return this.tabLists.get(player);
     }
 
+    /**
+     * Disables the tab list of a player.
+     * @param player
+     * @return The tab list removed (or null if it wasn't present).
+     */
     @Nullable
     public TabList destroyTabList(Player player) {
         TabList tabList = getTabList(player);
         if (tabList == null)
             return null;
+        this.tabLists.remove(player);
         return tabList.disable();
     }
 
+    /**
+     * Disables a tab list.
+     * @param tabList
+     * @return The tab list removed.
+     */
     @Nullable
     public TabList destroyTabList(@Nonnull TabList tabList) {
         return destroyTabList(tabList.getPlayer());

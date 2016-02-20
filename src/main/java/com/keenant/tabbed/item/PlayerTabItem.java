@@ -1,11 +1,15 @@
 package com.keenant.tabbed.item;
 
+import com.keenant.tabbed.TabItem;
 import com.keenant.tabbed.util.Reflection;
 import com.keenant.tabbed.util.Skin;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.entity.Player;
 
+/**
+ * A tab item that represents a player.
+ */
 @ToString
 public class PlayerTabItem implements TabItem {
     @Getter private final Player player;
@@ -38,7 +42,7 @@ public class PlayerTabItem implements TabItem {
             return false;
 
         String newText = this.textProvider.get(this.player);
-        boolean update = !newText.equals(this.text);
+        boolean update = this.text == null || !newText.equals(this.text);
         this.text = newText;
         return update;
     }
@@ -60,7 +64,7 @@ public class PlayerTabItem implements TabItem {
             return false;
 
         Skin newSkin = this.skinProvider.get(this.player);
-        boolean update = !newSkin.equals(this.skin);
+        boolean update = this.skin == null || !newSkin.equals(this.skin);
         this.skin = newSkin;
         return update;
     }

@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 
 import java.util.Collection;
 
+/**
+ * Represents the skin/avatar of a tab item.
+ */
 @ToString
 public class Skin {
     @Getter private final WrappedSignedProperty property;
@@ -22,6 +25,10 @@ public class Skin {
         this.property = property;
     }
 
+    /**
+     * Creates a skin from the player's Minecraft skin.
+     * @param player
+     */
     public Skin(Player player) {
         WrappedSignedProperty property = Skins.getDefaultSkin().getProperty();
         Collection<WrappedSignedProperty> properties = WrappedGameProfile.fromPlayer(player).getProperties().get("textures");

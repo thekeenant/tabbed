@@ -2,7 +2,7 @@ package com.keenant.tabbed.tablist;
 
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.item.PlayerTabItem;
-import com.keenant.tabbed.item.TabItem;
+import com.keenant.tabbed.TabItem;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * An implementation of SimpleTabList that behaves like vanilla Minecraft.
+ */
 public final class DefaultTabList extends SimpleTabList implements Listener {
     private Map<Player,String> names = new HashMap<>();
 
@@ -38,13 +41,13 @@ public final class DefaultTabList extends SimpleTabList implements Listener {
 
     @Override
     @Deprecated
-    public void set(int index, TabItem item) {
+    public TabItem set(int index, TabItem item) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @Deprecated
-    public void remove(int index) {
+    public TabItem remove(int index) {
         throw new UnsupportedOperationException();
     }
 

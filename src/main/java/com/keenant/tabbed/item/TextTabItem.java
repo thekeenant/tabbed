@@ -5,7 +5,9 @@ import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
 import lombok.ToString;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * A tab item with custom text, ping and skin.
@@ -24,11 +26,11 @@ public class TextTabItem implements TabItem {
         this(text, 1000);
     }
 
-    public TextTabItem(@Nonnull String text, int ping) {
-        this(text, ping, Skins.getDefaultSkin());
+    public TextTabItem(@Nonnull String text, @Nonnegative int ping) {
+        this(text, ping, Skins.DEFAULT_SKIN);
     }
 
-    public TextTabItem(@Nonnull String text, int ping, @Nonnull Skin skin) {
+    public TextTabItem(@Nonnull String text, @Nonnegative int ping, @Nonnull Skin skin) {
         this.newText = text;
         this.newPing = ping;
         this.newSkin = skin;
@@ -41,7 +43,7 @@ public class TextTabItem implements TabItem {
         this.newText = text;
     }
 
-    public void setPing(int ping) {
+    public void setPing(@Nonnegative int ping) {
         this.newPing = ping;
     }
 
@@ -51,7 +53,7 @@ public class TextTabItem implements TabItem {
 
     @Override
     public boolean updateText() {
-        boolean update = this.text == null || this.newText == null || !this.text.equals(this.newText);
+        boolean update = !Objects.equals(this.text, this.newText);
         this.text = this.newText;
         return update;
     }
@@ -59,14 +61,22 @@ public class TextTabItem implements TabItem {
     @Override
     public boolean updatePing() {
         boolean update = this.ping != this.newPing;
-        this.ping = newPing;
+        this.ping = this.newPing;
         return update;
     }
 
     @Override
     public boolean updateSkin() {
-        boolean update = this.skin == null || this.newSkin == null || !this.skin.equals(this.newSkin);
-        this.skin = newSkin;
+        boolean update = !Objects.equals(this.skin, this.newSkin);
+        this.skin = this.newSkin;
         return update;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof TextTabItem))
+            return false;
+        TextTabItem other = (TextTabItem) object;
+        return this.text.equals(other.getText()) && this.skin.equals(other.getSkin()) && this.ping == other.getPing();
     }
 }

@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 /**
  * An implementation of SimpleTabList that behaves like an HTML/CSS table.
@@ -220,9 +221,6 @@ public class TableTabList extends SimpleTabList {
         if (startCorner == TableCorner.BOTTOM_LEFT || startCorner == TableCorner.BOTTOM_RIGHT)
             reverseRow = true;
 
-        System.out.println(col1 + "," + row1 + " -> " + col2 + "," + row2);
-        System.out.println(reverseCol + " and " + reverseRow);
-
         if (direction == FillDirection.HORIZONTAL) {
             for (int row = row1; row <= row2; row++) {
                 for (int col = col1; col <= col2; col++) {
@@ -246,6 +244,7 @@ public class TableTabList extends SimpleTabList {
             }
         }
 
+        Tabbed.log(Level.INFO, "Filling " + col1 + "," + row1 + "->" + col2 + "," + row2 + " with " + map.size() + " items");
         set(map);
         return !iterator.hasNext();
     }

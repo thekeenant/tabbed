@@ -3,6 +3,7 @@ package com.keenant.tabbed;
 import com.google.common.base.Preconditions;
 import com.keenant.tabbed.tablist.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,9 +15,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class Tabbed implements Listener {
     private static Map<Plugin,Tabbed> instances = new HashMap<>();
+    @Getter @Setter static Level logLevel = Level.WARNING;
 
     @Getter private final Plugin plugin;
     private final Map<Player,TabList> tabLists;
@@ -26,6 +29,11 @@ public class Tabbed implements Listener {
         this.tabLists = new HashMap<>();
         this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
         instances.put(plugin, this);
+    }
+
+    public static void log(Level level, String message) {
+        if (level.intValue() >= logLevel.intValue())
+            System.out.println("[" + level.getName() + "] " + message);
     }
 
     /**

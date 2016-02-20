@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 /**
  * A simple implementation of a custom tab list that supports batch updates.
@@ -228,8 +229,10 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     private boolean put(int index, TabItem item) {
         if (index < 0 || index >= getMaxItems())
             return false;
-        if (item == null)
+        if (item == null) {
+            this.items.remove(index);
             return true;
+        }
         this.items.put(index, item);
         return true;
     }
@@ -258,9 +261,9 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
         List<PacketContainer> packets = new ArrayList<>(2);
 
-        boolean skinChanged = oldItem == null || !oldItem.equals(newItem) || newItem.updateSkin();
-        boolean textChanged = oldItem == null || newItem.updateText();
-        boolean pingChanged = oldItem == null || newItem.updatePing();
+        boolean skinChanged = oldItem == null || newItem.updateSkin() || !newItem.getSkin().equals(oldItem.getSkin());
+        boolean textChanged = oldItem == null || newItem.updateText() || !newItem.getText().equals(oldItem.getText());
+        boolean pingChanged = oldItem == null || newItem.updatePing() || oldItem.getPing() != newItem.getPing();
 
         if (skinChanged) {
             if (oldItem != null)
@@ -272,6 +275,12 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
                 packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_DISPLAY_NAME, getPlayerInfoData(index, newItem)));
             if (pingChanged)
                 packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_LATENCY, getPlayerInfoData(index, newItem)));
+        }
+
+        if (packets.size() > 0) {
+            Tabbed.log(Level.INFO, "Packet Update Made:");
+            Tabbed.log(Level.INFO, "  @" + index);
+            Tabbed.log(Level.INFO, "  (" + skinChanged + "/" + textChanged + "/" + pingChanged + " = " + packets.size() + " packets");
         }
 
         return packets;

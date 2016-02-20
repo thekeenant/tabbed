@@ -2,6 +2,7 @@ package com.keenant.tabbed.item;
 
 import com.keenant.tabbed.util.Reflection;
 import com.keenant.tabbed.util.Skin;
+import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.entity.Player;
@@ -53,7 +54,7 @@ public class PlayerTabItem implements TabItem {
 
         int newPing = getNewPing();
         boolean update = newPing != ping;
-        ping = newPing;
+        this.ping = newPing;
         return update;
     }
 
@@ -101,11 +102,19 @@ public class PlayerTabItem implements TabItem {
     private static PlayerProvider<Skin> SKIN_PROVIDER = new PlayerProvider<Skin>() {
         @Override
         public Skin get(Player player) {
-            return new Skin(player);
+            return Skins.getPlayer(player);
         }
     };
 
     public interface PlayerProvider<T> {
         T get(Player player);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof PlayerTabItem))
+            return false;
+        PlayerTabItem other = (PlayerTabItem) object;
+        return this.text.equals(other.getText()) && this.skin.equals(other.getSkin()) && this.ping == other.getPing();
     }
 }

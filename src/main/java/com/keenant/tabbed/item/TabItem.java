@@ -2,6 +2,8 @@ package com.keenant.tabbed.item;
 
 import com.keenant.tabbed.util.Skin;
 
+import java.util.UUID;
+
 /**
  * Represents a custom tab item.
  */
@@ -41,4 +43,11 @@ public interface TabItem {
      * @return If a change has been made.
      */
     boolean updateSkin();
+
+    /**
+     * Compare to another tab item.
+     * @param object
+     * @return
+     */
+    boolean equals(Object object);
 }

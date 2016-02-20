@@ -5,6 +5,7 @@ import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.item.BlankTabItem;
 import com.keenant.tabbed.TabItem;
 import lombok.*;
+import org.apache.commons.lang.mutable.MutableInt;
 import org.bukkit.craftbukkit.libs.jline.internal.Nullable;
 import org.bukkit.entity.Player;
 
@@ -165,27 +166,25 @@ public class TableTabList extends SimpleTabList {
         Map<Integer,TabItem> map = new HashMap<>();
         Iterator<TabItem> iterator = items.iterator();
 
-        int startCol = col1;
-        int endCol = col2;
+        boolean reverseCol = false;
+        boolean reverseRow = false;
 
-        int startRow = row1;
-        int endRow = row2;
+        if (startCorner == TableCorner.TOP_RIGHT || startCorner == TableCorner.BOTTOM_RIGHT)
+            reverseCol = true;
+        if (startCorner == TableCorner.BOTTOM_LEFT || startCorner == TableCorner.BOTTOM_RIGHT)
+            reverseRow = true;
 
-        if (startCorner == TableCorner.TOP_RIGHT ||startCorner == TableCorner.BOTTOM_RIGHT)  {
-            startCol = col2;
-            endCol = col1;
-        }
+        System.out.println(col1 + "," + row1 + " -> " + col2 + "," + row2);
+        System.out.println(reverseCol + " and " + reverseRow);
 
-        if (startCorner == TableCorner.BOTTOM_LEFT || startCorner == TableCorner.BOTTOM_RIGHT) {
-            startRow = row2;
-            endRow = row1;
-        }
+        // go by column first, then rows
+        for (int row = row1; row <= row2; row++) {
+            for (int col = col1; col <= col2; col++) {
+                int fixedCol = reverseCol ? col2 - (col - col1) : col;
+                int fixedRow = reverseRow ? row2 - (row - row1) : row;
 
-        for (int col = startCol; col <= endCol; col++) {
-            for (int row = startRow; row <= endRow; row++) {
-                if (iterator.hasNext()) {
-                    map.put(getIndex(col, row), iterator.next());
-                }
+                if (iterator.hasNext())
+                    map.put(getIndex(fixedCol, fixedRow), iterator.next());
             }
         }
         set(map);
@@ -276,7 +275,7 @@ public class TableTabList extends SimpleTabList {
 
         public TableBox(@Nonnull TableCell topLeft, @Nonnull TableCell bottomRight) {
             int width = bottomRight.getColumn() - topLeft.getColumn();
-            
+
             Preconditions.checkArgument(topLeft.getColumn() <= bottomRight.getColumn(), "col1 must be less than or equal to col2");
             Preconditions.checkArgument(topLeft.getRow() <= bottomRight.getRow(), "row1 must be less than or equal to row2");
 

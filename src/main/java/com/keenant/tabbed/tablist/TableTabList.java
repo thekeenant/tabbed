@@ -8,21 +8,21 @@ import lombok.*;
 import org.bukkit.craftbukkit.libs.jline.internal.Nullable;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Nonnull;
+import java.util.*;
 import java.util.Map.Entry;
 
 @ToString
 public class TableTabList extends SimpleTabList {
     @Getter private final int columns;
     @Getter private final int rows;
+    @Getter private final TableBox box;
 
     public TableTabList(Tabbed tabbed, Player player, int columns, int minColumnWidth, int maxColumnWidth) {
         super(tabbed, player, -1, minColumnWidth, maxColumnWidth);
         this.columns = columns;
         this.rows = getMinRows(columns);
+        this.box = new TableBox(new TableCell(0, 0), new TableCell(this.columns - 1, this.rows - 1));
     }
 
     @Override
@@ -83,19 +83,21 @@ public class TableTabList extends SimpleTabList {
     }
 
     /**
+     * Gets the box of the entire tab list.
+     * @return
+     */
+    public TableBox getBox() {
+        return this.box.clone();
+    }
+
+    /**
      * Set a single item at the given cell.
      * @param cell
      * @param item
      * @return The previous item
      */
     public TabItem set(TableCell cell, TabItem item) {
-        validateCell(cell);
-
-        TabItem previousItem = get(cell);
-
-        updateTable(cell, item);
-
-        return previousItem;
+        return set(cell.getColumn(), cell.getRow(), item);
     }
 
     /**
@@ -106,73 +108,99 @@ public class TableTabList extends SimpleTabList {
      * @return The tab item provided.
      */
     public TabItem set(int column, int row, TabItem item) {
-        return set(new TableCell(column, row), item);
+        return super.set(getIndex(column, row), item);
     }
 
     /**
      * Set a bunch of items.
      * @param items
      */
-    public void set(Map<TableCell,TabItem> items) {
+    public void setTable(Map<TableCell,TabItem> items) {
         for (Entry<TableCell,TabItem> entry : items.entrySet())
             validateCell(entry.getKey());
-        updateTable(items);
+
+        // new items
+        Map<Integer,TabItem> indexItems = new HashMap<>(items.size());
+        for (Entry<TableCell,TabItem> entry : items.entrySet())
+            indexItems.put(getIndex(entry.getKey()), entry.getValue());
+
+        super.set(indexItems);
     }
 
-    public boolean set(TableBox box, List<TabItem> items, TableCorner start) {
-        return set(box.getTopLeft().getColumn(), box.getTopLeft().getRow(), box.getBottomRight().getColumn(), box.getBottomRight().getRow(), items, start);
+    /**
+     * Fill a box from the top left.
+     * @param box
+     * @param items
+     * @return
+     */
+    public boolean fill(TableBox box, List<TabItem> items) {
+        return fill(box, items, TableCorner.TOP_LEFT);
     }
 
     /**
      * Fills a box with a list of tab items.
-     * @param col1 x1
-     * @param row1 y1
+     * @param box
+     * @param items The items to fill the box with.
+     * @param startCorner Where to begin filling the box.
+     * @return
+     */
+    public boolean fill(TableBox box, List<TabItem> items, TableCorner startCorner) {
+        return fill(box.getTopLeft().getColumn(), box.getTopLeft().getRow(), box.getBottomRight().getColumn(), box.getBottomRight().getRow(), items, startCorner);
+    }
+
+    /**
+     * Fills a box with a list of tab items.
+     * @param col1 x1 Must be less than or equal to x2
+     * @param row1 y1 Must be less than or equal to y2
      * @param col2 x2
      * @param row2 y2
      * @param items The items to fill the box with.
      * @param startCorner Where to begin filling the box.
      * @return True if all the items fit, false if otherwise.
      */
-    public boolean set(int col1, int row1, int col2, int row2, List<TabItem> items, TableCorner startCorner) {
+    public boolean fill(int col1, int row1, int col2, int row2, List<TabItem> items, TableCorner startCorner) {
         validateCell(col1, row1);
         validateCell(col2, row2);
 
-        Map<TableCell,TabItem> map = new HashMap<>();
+        Map<Integer,TabItem> map = new HashMap<>();
         Iterator<TabItem> iterator = items.iterator();
 
-        for (int col = col1; col <= col2; col++) {
-            for (int row = row1; row <= row2; row++) {
+        int startCol = col1;
+        int endCol = col2;
+
+        int startRow = row1;
+        int endRow = row2;
+
+        if (startCorner == TableCorner.TOP_RIGHT ||startCorner == TableCorner.BOTTOM_RIGHT)  {
+            startCol = col2;
+            endCol = col1;
+        }
+
+        if (startCorner == TableCorner.BOTTOM_LEFT || startCorner == TableCorner.BOTTOM_RIGHT) {
+            startRow = row2;
+            endRow = row1;
+        }
+
+        for (int col = startCol; col <= endCol; col++) {
+            for (int row = startRow; row <= endRow; row++) {
                 if (iterator.hasNext()) {
-                    map.put(new TableCell(col, row), iterator.next());
+                    map.put(getIndex(col, row), iterator.next());
                 }
             }
         }
         set(map);
-
         return !iterator.hasNext();
     }
 
-    private void updateTable(TableCell cell, TabItem newItem) {
-        update(getIndex(cell), newItem);
-    }
-
-    private void updateTable(Map<TableCell,TabItem> items) {
-        Map<Integer,TabItem> map = new HashMap<>();
-        for (Entry<TableCell,TabItem> entry : items.entrySet())
-            map.put(getIndex(entry.getKey()), entry.getValue());
-        update(map);
-    }
-
     private void reset() {
-        Map<TableCell,TabItem> items = new HashMap<>();
+        Map<Integer,TabItem> newItems = new HashMap<>();
         for (int row = 0; row < this.columns; row++) {
             for (int column = 0; column < this.rows; column++) {
-                TableCell cell = new TableCell(row, column);
                 TabItem item = new BlankTabItem();
-                items.put(cell, item);
+                newItems.put(getIndex(row, column), item);
             }
         }
-        updateTable(items);
+        set(newItems);
     }
 
     private int getIndex(TableCell cell) {
@@ -211,9 +239,19 @@ public class TableTabList extends SimpleTabList {
     @Data
     @AllArgsConstructor
     @EqualsAndHashCode
-    public class TableCell {
+    public static class TableCell {
         private int column;
         private int row;
+
+        public TableCell add(int columns, int rows) {
+            this.column += columns;
+            this.row += rows;
+            return this;
+        }
+
+        public TableCell clone() {
+            return new TableCell(this.column, this.row);
+        }
 
         @Override
         public String toString() {
@@ -227,15 +265,95 @@ public class TableTabList extends SimpleTabList {
     public enum TableCorner {
         TOP_LEFT,
         TOP_RIGHT,
-        BOTTOM_LEFT,
-        BOTTOM_RIGHT;
+        BOTTOM_RIGHT,
+        BOTTOM_LEFT
     }
 
-    @Data
-    @AllArgsConstructor
+    @ToString
     @EqualsAndHashCode
-    public class TableBox {
-        private TableCell topLeft;
-        private TableCell bottomRight;
+    public static class TableBox {
+        @Getter private final List<TableCell> cells;
+
+        public TableBox(@Nonnull TableCell topLeft, @Nonnull TableCell bottomRight) {
+            int width = bottomRight.getColumn() - topLeft.getColumn();
+            
+            Preconditions.checkArgument(topLeft.getColumn() <= bottomRight.getColumn(), "col1 must be less than or equal to col2");
+            Preconditions.checkArgument(topLeft.getRow() <= bottomRight.getRow(), "row1 must be less than or equal to row2");
+
+            this.cells = new ArrayList<>(4);
+            this.cells.add(topLeft.clone());
+            this.cells.add(topLeft.clone().add(width, 0));
+            this.cells.add(bottomRight.clone());
+            this.cells.add(bottomRight.clone().add(-width, 0));
+        }
+
+        /**
+         * Get a corner of this box.
+         * @param corner
+         * @return
+         */
+        public TableCell get(TableCorner corner) {
+            return this.cells.get(corner.ordinal());
+        }
+
+        /**
+         * Top left.
+         * @return
+         */
+        public TableCell getTopLeft() {
+            return get(TableCorner.TOP_LEFT);
+        }
+
+        /**
+         * Top right.
+         * @return
+         */
+        public TableCell getTopRight() {
+            return get(TableCorner.TOP_RIGHT);
+        }
+
+        /**
+         * Bottom right.
+         * @return
+         */
+        public TableCell getBottomRight() {
+            return get(TableCorner.BOTTOM_RIGHT);
+        }
+
+        /**
+         * Bottom left.
+         * @return
+         */
+        public TableCell getBottomLeft() {
+            return get(TableCorner.BOTTOM_LEFT);
+        }
+
+        /**
+         * Get the width of this box.
+         * @return
+         */
+        public int getWidth() {
+            return getTopRight().getColumn() - getTopLeft().getColumn();
+        }
+
+        /**
+         * Get the height of this box.
+         * @return
+         */
+        public int getHeight() {
+            return getTopLeft().getRow() - getBottomLeft().getRow();
+        }
+
+        /**
+         * Get the size of this box.
+         * @return
+         */
+        public int getSize() {
+            return getWidth() * getHeight();
+        }
+
+        public TableBox clone() {
+            return new TableBox(this.getTopLeft().clone(), this.getBottomRight().clone());
+        }
     }
 }

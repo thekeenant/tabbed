@@ -10,12 +10,12 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.base.Preconditions;
-import com.keenant.tabbed.CustomTabList;
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.TabItem;
 import com.keenant.tabbed.util.Packets;
 import lombok.Getter;
 import lombok.ToString;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -43,7 +43,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
     public SimpleTabList(Tabbed tabbed, Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
         super(player);
-        Preconditions.checkArgument(maxItems < MAXIMUM_ITEMS, "maxItems cannot exceed client maximum of " + MAXIMUM_ITEMS);
+        Preconditions.checkArgument(maxItems <= MAXIMUM_ITEMS, "maxItems cannot exceed client maximum of " + MAXIMUM_ITEMS);
         Preconditions.checkArgument(minColumnWidth <= maxColumnWidth || maxColumnWidth < 0, "minColumnWidth cannot be greater than maxColumnWidth");
 
         this.tabbed = tabbed;
@@ -54,7 +54,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         this.updater = new Runnable() {
             @Override
             public void run() {
-                update(items);
+                update(items, items);
             }
         };
 
@@ -68,6 +68,11 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
     @Override
     public SimpleTabList enable() {
+        List<PacketContainer> packets = new ArrayList<>();
+        for (Player target : Bukkit.getOnlinePlayers())
+            packets.add(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(WrappedGameProfile.fromPlayer(target), 0, null)));
+        Packets.send(this.player, packets);
+
         super.enable();
         registerListener();
         this.updaterId = this.tabbed.getPlugin().getServer().getScheduler().scheduleSyncRepeatingTask(this.tabbed.getPlugin(), this.updater, 0, 20);
@@ -125,6 +130,9 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
     public void add(int index, TabItem item) {
         validateIndex(index);
+        Map<Integer,TabItem> current = new HashMap<>();
+        current.putAll(this.items);
+
         Map<Integer,TabItem> map = new HashMap<>();
         for (int i = index; i < getMaxItems(); i++) {
             if (!contains(i))
@@ -133,20 +141,31 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
             map.put(i + 1, move);
         }
         map.put(index, item);
-        update(map);
+        update(current, map);
     }
 
     public TabItem set(int index, TabItem item) {
-        validateIndex(index);
-        TabItem current = get(index);
-        update(index, item);
-        return current;
+        Map<Integer,TabItem> items = new HashMap<>(1);
+        items.put(index, item);
+        return set(items).get(index);
+    }
+
+    public Map<Integer,TabItem> set(Map<Integer,TabItem> items) {
+        for (Entry<Integer,TabItem> entry : items.entrySet())
+            validateIndex(entry.getKey());
+
+        Map<Integer,TabItem> oldItems = new HashMap<>();
+        oldItems.putAll(this.items);
+        update(oldItems, items);
+
+        return oldItems;
     }
 
     public TabItem remove(int index) {
         validateIndex(index);
-        update(index, null);
-        return this.items.remove(index);
+        TabItem removed = this.items.remove(index);
+        update(index, removed, null);
+        return removed;
     }
 
     public <T extends TabItem> T remove(T item) {
@@ -170,13 +189,13 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     }
 
     public void update() {
-        update(this.items);
+        update(this.items, this.items);
     }
 
     public void update(int index) {
         Map<Integer,TabItem> map = new HashMap<>();
         map.put(index, get(index));
-        update(map);
+        update(index, get(index), get(index));
     }
 
     public int getNextIndex() {
@@ -188,20 +207,22 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         return -1;
     }
 
-    protected void update(int index, TabItem newItem) {
-        Map<Integer,TabItem> map = new HashMap<>();
-        map.put(index, newItem);
-        update(map);
+    protected void update(int index, TabItem oldItem, TabItem newItem) {
+        Map<Integer,TabItem> oldItems = new HashMap<>(1);
+        oldItems.put(index, oldItem);
+
+        Map<Integer,TabItem> newItems = new HashMap<>(1);
+        newItems.put(index, newItem);
+
+        update(oldItems, newItems);
     }
 
-    protected void update(Map<Integer,TabItem> items) {
-        Map<Integer,TabItem> oldItems = new HashMap<>();
-        oldItems.putAll(this.items);
+    protected void update(Map<Integer,TabItem> oldItems, Map<Integer,TabItem> items) {
         update(oldItems, items, false);
     }
 
     private void validateIndex(int index) {
-        Preconditions.checkArgument(index < 0 || index >= getMaxItems(), "index not in allowed range");
+        Preconditions.checkArgument(index > 0 || index < getMaxItems(), "index not in allowed range");
     }
 
     private boolean put(int index, TabItem item) {
@@ -237,7 +258,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
         List<PacketContainer> packets = new ArrayList<>(2);
 
-        boolean skinChanged = oldItem == null || newItem.updateSkin();
+        boolean skinChanged = oldItem == null || !oldItem.equals(newItem) || newItem.updateSkin();
         boolean textChanged = oldItem == null || newItem.updateText();
         boolean pingChanged = oldItem == null || newItem.updatePing();
 
@@ -299,16 +320,18 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     }
 
     private PlayerInfoData getPlayerInfoData(WrappedGameProfile profile, int ping, String displayName) {
-        // min width
-        while (displayName.length() < this.minColumnWidth)
-            displayName += " ";
+        if (displayName != null) {
+            // min width
+            while (displayName.length() < this.minColumnWidth)
+                displayName += " ";
 
-        // max width
-        if (this.maxColumnWidth > 0)
-            while (displayName.length() > this.maxColumnWidth)
-                displayName = displayName.substring(0, displayName.length() - 1);
+            // max width
+            if (this.maxColumnWidth > 0)
+                while (displayName.length() > this.maxColumnWidth)
+                    displayName = displayName.substring(0, displayName.length() - 1);
+        }
 
-        return new PlayerInfoData(profile, ping, NativeGameMode.NOT_SET, WrappedChatComponent.fromText(displayName));
+        return new PlayerInfoData(profile, ping, NativeGameMode.NOT_SET, displayName == null ? null : WrappedChatComponent.fromText(displayName));
     }
 
     private WrappedGameProfile getGameProfile(int index, WrappedSignedProperty skin) {

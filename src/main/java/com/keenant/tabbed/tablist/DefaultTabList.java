@@ -47,7 +47,7 @@ public final class DefaultTabList extends SimpleTabList implements Listener {
 
     @Override
     @Deprecated
-    public void remove(int index) {
+    public TabItem remove(int index) {
         throw new UnsupportedOperationException();
     }
 

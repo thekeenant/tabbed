@@ -1,4 +1,6 @@
-package com.keenant.tabbed;
+package com.keenant.tabbed.tablist;
+
+import com.keenant.tabbed.TabItem;
 
 import javax.annotation.Nullable;
 

@@ -42,7 +42,7 @@ public class PlayerTabItem implements TabItem {
             return false;
 
         String newText = this.textProvider.get(this.player);
-        boolean update = !newText.equals(this.text);
+        boolean update = this.text == null || !newText.equals(this.text);
         this.text = newText;
         return update;
     }
@@ -64,7 +64,7 @@ public class PlayerTabItem implements TabItem {
             return false;
 
         Skin newSkin = this.skinProvider.get(this.player);
-        boolean update = !newSkin.equals(this.skin);
+        boolean update = this.skin == null || !newSkin.equals(this.skin);
         this.skin = newSkin;
         return update;
     }

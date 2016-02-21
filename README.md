@@ -1,7 +1,5 @@
 # Tabbed
 
-![http://i.imgur.com/ftS7FkG.png](http://i.imgur.com/ftS7FkG.png)
-
 Tabbed is a Bukkit API for configuring the tablist to the desire of any plugin developer! Make tab lists the
 way in which you always desired.
 
@@ -11,7 +9,27 @@ way in which you always desired.
 
 **Demonstration:**
 
-Soon!
+![http://i.imgur.com/hbO4Nbq.gif](http://i.imgur.com/hbO4Nbq.gif)
+
+## Maven
+
+```xml
+<repositories>
+    <repository>
+        <id>avicus-public</id>
+        <url>https://repo.avicus.net/content/groups/public/</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>net.avicus</groupId>
+        <artifactId>tabbed</artifactId>
+        <version>1.7-SNAPSHOT</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+```
 
 ## Usage
 **Create Tabbed for your plugin:**
@@ -35,7 +53,7 @@ new PlayerTabItem(player, PlayerTabItem.LIST_NAME_PROVIDER);
 new PlayerTabItem(player, PlayerTabItem.LIST_NAME_PROVIDER, PlayerTabItem.SKIN_PROVIDER);
 
 new PlayerTabItem(player, PlayerTabItem.DISPLAY_NAME_PROVIDER);
-new PlayerTabItem(player, PlayerTabItem.DISPLAY_NAME_PROVIDER, Skins.getSkin(ChatColor.RED));
+new PlayerTabItem(player, PlayerTabItem.DISPLAY_NAME_PROVIDER, Skins.getDot(ChatColor.RED));
 
 new PlayerTabItem(player, new PlayerProvider<String>() {
     @Override
@@ -46,10 +64,11 @@ new PlayerTabItem(player, new PlayerProvider<String>() {
 
 // TextTabItem
 new TextTabItem("Some text!", 1000); // ping = 1,000 in this case
-new TextTabItem("Some text!", 1000, Skins.getDefaultSkin());
+new TextTabItem("Some text!", 1000, Skins.DEFAULT_SKIN);
 
-new TextTabItem("Red skin :D", 0, Skins.getSkin(ChatColor.RED));
-new TextTabItem("Yellow skin :O", 0, Skins.getSkin(ChatColor.YELLOW));
+new TextTabItem("Red skin :D", 0, Skins.getDot(ChatColor.RED));
+new TextTabItem("Yellow skin :O", 0, Skins.getDot(ChatColor.YELLOW));
+new TextTabItem("An Enderman!", 0, Skins.getMob(EntityType.ENDERMAN));
 
 // BlankTabItem
 new BlankTabItem(Skins.getSkin(ChatColor.RED);

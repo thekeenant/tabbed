@@ -1,7 +1,5 @@
 # Tabbed
 
-![http://i.imgur.com/hbO4Nbq.gif](http://i.imgur.com/hbO4Nbq.gif)
-
 Tabbed is a Bukkit API for configuring the tablist to the desire of any plugin developer! Make tab lists the
 way in which you always desired.
 
@@ -11,7 +9,27 @@ way in which you always desired.
 
 **Demonstration:**
 
-Soon!
+![http://i.imgur.com/hbO4Nbq.gif](http://i.imgur.com/hbO4Nbq.gif)
+
+## Maven
+
+```xml
+<repositories>
+    <repository>
+        <id>avicus-public</id>
+        <url>https://repo.avicus.net/content/groups/public/</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>net.avicus</groupId>
+        <artifactId>tabbed</artifactId>
+        <version>1.7-SNAPSHOT</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+```
 
 ## Usage
 **Create Tabbed for your plugin:**

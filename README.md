@@ -23,10 +23,9 @@ way in which you always desired.
 
 <dependencies>
     <dependency>
-        <groupId>net.avicus</groupId>
+        <groupId>com.keenant</groupId>
         <artifactId>tabbed</artifactId>
         <version>1.7-SNAPSHOT</version>
-        <scope>provided</scope>
     </dependency>
 </dependencies>
 ```

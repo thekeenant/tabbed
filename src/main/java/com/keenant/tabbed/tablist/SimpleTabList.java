@@ -1,8 +1,6 @@
 package com.keenant.tabbed.tablist;
 
-import com.comphenix.protocol.PacketType.Play.Server;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.*;
+import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
@@ -10,12 +8,10 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.google.common.base.Preconditions;
 import com.keenant.tabbed.Tabbed;
-import com.keenant.tabbed.item.PlayerTabItem;
 import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.util.Packets;
 import lombok.Getter;
 import lombok.ToString;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -31,7 +27,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
     protected final Tabbed tabbed;
     protected final Map<Integer,TabItem> items;
-    private final PacketListener packetListener;
     private final int maxItems;
     private final int minColumnWidth;
     private final int maxColumnWidth;
@@ -60,7 +55,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         };
 
         this.items = new HashMap<>();
-        this.packetListener = createPacketListener();
     }
 
     public int getMaxItems() {
@@ -69,13 +63,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
     @Override
     public SimpleTabList enable() {
-        List<PacketContainer> packets = new ArrayList<>();
-        for (Player target : Bukkit.getOnlinePlayers())
-            packets.add(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(WrappedGameProfile.fromPlayer(target), 0, null)));
-        Packets.send(this.player, packets);
-
         super.enable();
-        registerListener();
         this.updaterId = this.tabbed.getPlugin().getServer().getScheduler().scheduleSyncRepeatingTask(this.tabbed.getPlugin(), this.updater, 0, 20);
         return this;
     }
@@ -83,7 +71,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     @Override
     public SimpleTabList disable() {
         super.disable();
-        unregisterListener();
         this.tabbed.getPlugin().getServer().getScheduler().cancelTask(updaterId);
         return this;
     }
@@ -340,17 +327,12 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
                     displayName = displayName.substring(0, displayName.length() - 1);
         }
 
-        return new PlayerInfoData(profile, ping, NativeGameMode.NOT_SET, displayName == null ? null : WrappedChatComponent.fromText(displayName));
+        return new PlayerInfoData(profile, ping, NativeGameMode.SURVIVAL, displayName == null ? null : WrappedChatComponent.fromText(displayName));
     }
 
     private WrappedGameProfile getGameProfile(int index, TabItem item) {
         String name = getStringIndex(index);
         UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
-
-        if (item instanceof PlayerTabItem) {
-            Player player = ((PlayerTabItem) item).getPlayer();
-            uuid = player.getUniqueId();
-        }
 
         WrappedGameProfile profile = new WrappedGameProfile(uuid, "$" + name);
         profile.getProperties().put("textures", item.getSkin().getProperty());
@@ -359,53 +341,5 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
     private String getStringIndex(int index) {
         return String.format("%03d", index);
-    }
-
-    private void registerListener() {
-        ProtocolLibrary.getProtocolManager().addPacketListener(this.packetListener);
-    }
-
-    private void unregisterListener() {
-        ProtocolLibrary.getProtocolManager().removePacketListener(this.packetListener);
-    }
-
-    private PacketAdapter createPacketListener() {
-        return new PacketAdapter(this.tabbed.getPlugin(), ListenerPriority.NORMAL, Server.PLAYER_INFO, Server.NAMED_ENTITY_SPAWN) {
-            public void onPacketSending(PacketEvent event) {
-                if (event.getPacketType() == Server.NAMED_ENTITY_SPAWN)
-                    onPacketSendingSpawn(event);
-                else if (event.getPacketType() == Server.PLAYER_INFO)
-                    onPacketSendingInfo(event);
-            }
-
-            private void onPacketSendingSpawn(PacketEvent event) {
-
-            }
-
-            private void onPacketSendingInfo(PacketEvent event) {
-                if (!event.getPlayer().equals(player))
-                    return;
-
-                PacketContainer packet = event.getPacket();
-                List<PlayerInfoData> playerData = packet.getPlayerInfoDataLists().read(0);
-                List<PlayerInfoData> newData = new ArrayList<>();
-
-                for (PlayerInfoData data : playerData) {
-                    if (data.getProfile().getName().startsWith("$")) {
-                        String corrected = data.getProfile().getName().substring(1);
-                        WrappedGameProfile profile = new WrappedGameProfile(data.getProfile().getUUID(), corrected);
-                        profile.getProperties().putAll(data.getProfile().getProperties());
-
-                        PlayerInfoData replaced = new PlayerInfoData(profile, data.getPing(), data.getGameMode(), data.getDisplayName());
-                        newData.add(replaced);
-                    }
-                }
-
-                if (newData.size() == 0)
-                    event.setCancelled(true);
-                else
-                    packet.getPlayerInfoDataLists().write(0, newData);
-            }
-        };
     }
 }

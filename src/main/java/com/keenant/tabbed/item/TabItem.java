@@ -2,8 +2,6 @@ package com.keenant.tabbed.item;
 
 import com.keenant.tabbed.util.Skin;
 
-import java.util.UUID;
-
 /**
  * Represents a custom tab item.
  */

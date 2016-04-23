@@ -1,6 +1,6 @@
 package com.keenant.tabbed.tablist;
 
-import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.*;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
@@ -8,10 +8,10 @@ import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.base.Preconditions;
-import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.Tabbed;
+import com.keenant.tabbed.item.PlayerTabItem;
+import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.util.Packets;
 import lombok.Getter;
 import lombok.ToString;
@@ -324,7 +324,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     }
 
     private PlayerInfoData getPlayerInfoData(int index, TabItem item) {
-        WrappedGameProfile profile = getGameProfile(index, item.getSkin().getProperty());
+        WrappedGameProfile profile = getGameProfile(index, item);
         return getPlayerInfoData(profile, item.getPing(), item.getText());
     }
 
@@ -343,10 +343,17 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         return new PlayerInfoData(profile, ping, NativeGameMode.NOT_SET, displayName == null ? null : WrappedChatComponent.fromText(displayName));
     }
 
-    private WrappedGameProfile getGameProfile(int index, WrappedSignedProperty skin) {
-        String stringIndex = getStringIndex(index);
-        WrappedGameProfile profile = new WrappedGameProfile(UUID.nameUUIDFromBytes(stringIndex.getBytes()), "$" + stringIndex);
-        profile.getProperties().put("textures", skin);
+    private WrappedGameProfile getGameProfile(int index, TabItem item) {
+        String name = getStringIndex(index);
+        UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
+
+        if (item instanceof PlayerTabItem) {
+            Player player = ((PlayerTabItem) item).getPlayer();
+            uuid = player.getUniqueId();
+        }
+
+        WrappedGameProfile profile = new WrappedGameProfile(uuid, "$" + name);
+        profile.getProperties().put("textures", item.getSkin().getProperty());
         return profile;
     }
 
@@ -363,8 +370,19 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     }
 
     private PacketAdapter createPacketListener() {
-        return new PacketAdapter(this.tabbed.getPlugin(), ListenerPriority.NORMAL, PacketType.Play.Server.PLAYER_INFO) {
+        return new PacketAdapter(this.tabbed.getPlugin(), ListenerPriority.NORMAL, Server.PLAYER_INFO, Server.NAMED_ENTITY_SPAWN) {
             public void onPacketSending(PacketEvent event) {
+                if (event.getPacketType() == Server.NAMED_ENTITY_SPAWN)
+                    onPacketSendingSpawn(event);
+                else if (event.getPacketType() == Server.PLAYER_INFO)
+                    onPacketSendingInfo(event);
+            }
+
+            private void onPacketSendingSpawn(PacketEvent event) {
+
+            }
+
+            private void onPacketSendingInfo(PacketEvent event) {
                 if (!event.getPlayer().equals(player))
                     return;
 

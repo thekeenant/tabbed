@@ -2,8 +2,6 @@ package com.keenant.tabbed.tablist;
 
 import com.keenant.tabbed.item.TabItem;
 
-import javax.annotation.Nullable;
-
 /**
  * Represents a tab list that can have custom and dynamic TabItem's.
  */
@@ -29,7 +27,6 @@ public interface CustomTabList extends TabList {
      * @param index
      * @return The item or null if it isn't present.
      */
-    @Nullable
     TabItem get(int index);
 
     /**
@@ -58,7 +55,6 @@ public interface CustomTabList extends TabList {
      * @param item
      * @return
      */
-    @Nullable
     TabItem set(int index, TabItem item);
 
     /**
@@ -66,7 +62,6 @@ public interface CustomTabList extends TabList {
      * @param index
      * @return The item removed or null if it isn't present.
      */
-    @Nullable
     TabItem remove(int index);
 
     /**

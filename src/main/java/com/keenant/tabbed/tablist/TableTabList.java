@@ -1,14 +1,12 @@
 package com.keenant.tabbed.tablist;
 
 import com.google.common.base.Preconditions;
-import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.item.BlankTabItem;
+import com.keenant.tabbed.item.TabItem;
 import lombok.*;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -92,7 +90,6 @@ public class TableTabList extends SimpleTabList {
      * @param cell
      * @return The item or null if it is empty (BlankTabItem).
      */
-    @Nullable
     public TabItem get(TableCell cell) {
         validateCell(cell);
         return get(getIndex(cell));
@@ -324,7 +321,7 @@ public class TableTabList extends SimpleTabList {
     public static class TableBox {
         @Getter private final List<TableCell> cells;
 
-        public TableBox(@Nonnull TableCell topLeft, @Nonnull TableCell bottomRight) {
+        public TableBox(TableCell topLeft, TableCell bottomRight) {
             int width = bottomRight.getColumn() - topLeft.getColumn();
 
             Preconditions.checkArgument(topLeft.getColumn() <= bottomRight.getColumn(), "col1 must be less than or equal to col2");

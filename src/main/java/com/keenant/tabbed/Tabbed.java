@@ -11,8 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,7 +39,6 @@ public class Tabbed implements Listener {
      * @param plugin
      * @return
      */
-    @Nullable
     public static Tabbed getTabbed(Plugin plugin) {
         return instances.get(plugin);
     }
@@ -56,7 +53,6 @@ public class Tabbed implements Listener {
      * @param player
      * @return The tab list, or null if it wasn't present.
      */
-    @Nullable
     public TabList getTabList(Player player) {
         return this.tabLists.get(player);
     }
@@ -66,7 +62,6 @@ public class Tabbed implements Listener {
      * @param player
      * @return The tab list removed (or null if it wasn't present).
      */
-    @Nullable
     public TabList destroyTabList(Player player) {
         TabList tabList = getTabList(player);
         if (tabList == null)
@@ -80,8 +75,7 @@ public class Tabbed implements Listener {
      * @param tabList
      * @return The tab list removed.
      */
-    @Nullable
-    public TabList destroyTabList(@Nonnull TabList tabList) {
+    public TabList destroyTabList(TabList tabList) {
         return destroyTabList(tabList.getPlayer());
     }
 

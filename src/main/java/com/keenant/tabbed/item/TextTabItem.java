@@ -5,8 +5,6 @@ import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
 import lombok.ToString;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -22,15 +20,15 @@ public class TextTabItem implements TabItem {
     private int newPing;
     private Skin newSkin;
 
-    public TextTabItem(@Nonnull String text) {
+    public TextTabItem(String text) {
         this(text, 1000);
     }
 
-    public TextTabItem(@Nonnull String text, @Nonnegative int ping) {
+    public TextTabItem(String text, int ping) {
         this(text, ping, Skins.DEFAULT_SKIN);
     }
 
-    public TextTabItem(@Nonnull String text, @Nonnegative int ping, @Nonnull Skin skin) {
+    public TextTabItem(String text, int ping, Skin skin) {
         this.newText = text;
         this.newPing = ping;
         this.newSkin = skin;
@@ -39,15 +37,15 @@ public class TextTabItem implements TabItem {
         updateSkin();
     }
 
-    public void setText(@Nonnull String text) {
+    public void setText(String text) {
         this.newText = text;
     }
 
-    public void setPing(@Nonnegative int ping) {
+    public void setPing(int ping) {
         this.newPing = ping;
     }
 
-    public void setSkin(@Nonnull Skin skin) {
+    public void setSkin(Skin skin) {
         this.newSkin = skin;
     }
 

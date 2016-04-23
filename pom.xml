@@ -21,16 +21,16 @@
     </distributionManagement>
 
     <repositories>
-        <!-- PaperSpigot -->
-        <repository>
-            <id>avicus-public</id>
-            <url>https://repo.avicus.net/content/groups/public/</url>
-        </repository>
-
         <!-- ProtocolLib! -->
         <repository>
             <id>dmulloy2-repo</id>
             <url>http://repo.dmulloy2.net/content/groups/public/</url>
+        </repository>
+
+        <!-- Spigot -->
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 
@@ -43,11 +43,19 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- PaperSpigot -->
+        <!-- Spigot API -->
         <dependency>
-            <groupId>com.github</groupId>
-            <artifactId>paperspigot</artifactId>
-            <version>1.8.8</version>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.9.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Bukkit API -->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.9.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 

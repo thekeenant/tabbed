@@ -23,6 +23,9 @@ public class PlayerTabItem implements TabItem {
         this.player = player;
         this.textProvider = textProvider;
         this.skinProvider = skinProvider;
+        this.text = textProvider.get(player);
+        this.ping = getNewPing();
+        this.skin = skinProvider.get(player);
         updateText();
         updatePing();
         updateSkin();

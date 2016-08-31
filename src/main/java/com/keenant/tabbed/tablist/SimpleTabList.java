@@ -31,9 +31,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     private final int minColumnWidth;
     private final int maxColumnWidth;
 
-    private int updaterId;
-    private final Runnable updater;
-
     @Getter boolean batchEnabled;
     private final Map<Integer,TabItem> clientItems;
 
@@ -47,13 +44,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         this.minColumnWidth = minColumnWidth;
         this.maxColumnWidth = maxColumnWidth;
         this.clientItems = new HashMap<>();
-        this.updater = new Runnable() {
-            @Override
-            public void run() {
-                update(items, items);
-            }
-        };
-
         this.items = new HashMap<>();
     }
 
@@ -64,14 +54,12 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     @Override
     public SimpleTabList enable() {
         super.enable();
-        this.updaterId = this.tabbed.getPlugin().getServer().getScheduler().scheduleSyncRepeatingTask(this.tabbed.getPlugin(), this.updater, 0, 20);
         return this;
     }
 
     @Override
     public SimpleTabList disable() {
         super.disable();
-        this.tabbed.getPlugin().getServer().getScheduler().cancelTask(updaterId);
         return this;
     }
 
@@ -145,7 +133,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         Map<Integer,TabItem> oldItems = new HashMap<>();
         oldItems.putAll(this.items);
         update(oldItems, items);
-
         return oldItems;
     }
 
@@ -274,7 +261,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     }
 
     private List<PacketContainer> getUpdate(Map<Integer,TabItem> oldItems, Map<Integer,TabItem> items) {
-        List<PacketContainer> all = new ArrayList<>(items.size()  * 2);
+        List<PacketContainer> all = new ArrayList<>(items.size() * 2);
 
         for (Entry<Integer,TabItem> entry : items.entrySet())
             all.addAll(getUpdate(entry.getKey(), oldItems.get(entry.getKey()), entry.getValue()));

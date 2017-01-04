@@ -246,17 +246,17 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
             packets.add(Packets.getPacket(PlayerInfoAction.ADD_PLAYER, getPlayerInfoData(index, newItem)));
         }
         else {
-            if (textChanged)
-                packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_DISPLAY_NAME, getPlayerInfoData(index, newItem)));
             if (pingChanged)
                 packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_LATENCY, getPlayerInfoData(index, newItem)));
         }
 
-        if (packets.size() > 0) {
-            Tabbed.log(Level.INFO, "Packet Update Made:");
-            Tabbed.log(Level.INFO, "  @" + index);
-            Tabbed.log(Level.INFO, "  (" + skinChanged + "/" + textChanged + "/" + pingChanged + " = " + packets.size() + " packets");
-        }
+        packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_DISPLAY_NAME, getPlayerInfoData(index, newItem)));
+
+       // if (packets.size() > 0) {
+       //     Tabbed.log(Level.INFO, "Packet Update Made:");
+       //     Tabbed.log(Level.INFO, "  @" + index);
+       //     Tabbed.log(Level.INFO, "  (" + skinChanged + "/" + textChanged + "/" + pingChanged + " = " + packets.size() + " packets");
+       // }
 
         return packets;
     }

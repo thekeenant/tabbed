@@ -70,7 +70,8 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         if (!this.batchEnabled)
             throw new UnsupportedOperationException("cannot batch update when batch is not enabled, call setBachEnabled(true) first");
         update(this.clientItems, this.items, true);
-        batchReset();
+        this.clientItems.clear();
+        this.clientItems.putAll(this.items);
     }
 
     /**
@@ -321,7 +322,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         String name = getStringIndex(index);
         UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
 
-        WrappedGameProfile profile = new WrappedGameProfile(uuid, "$" + name);
+        WrappedGameProfile profile = new WrappedGameProfile(uuid, "UpdateTo1.8.9");
         profile.getProperties().put("textures", item.getSkin().getProperty());
         return profile;
     }

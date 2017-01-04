@@ -322,7 +322,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         String name = getStringIndex(index);
         UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
 
-        WrappedGameProfile profile = new WrappedGameProfile(uuid, "UpdateTo1.8.9");
+        WrappedGameProfile profile = new WrappedGameProfile(uuid, name + "|UpdateMC");
         profile.getProperties().put("textures", item.getSkin().getProperty());
         return profile;
     }

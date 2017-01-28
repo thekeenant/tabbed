@@ -67,8 +67,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
      * Sends the batch update to the player and resets the batch.
      */
     public void batchUpdate() {
-        if (!this.batchEnabled)
-            throw new UnsupportedOperationException("cannot batch update when batch is not enabled, call setBachEnabled(true) first");
         update(this.clientItems, this.items, true);
         this.clientItems.clear();
         this.clientItems.putAll(this.items);
@@ -78,8 +76,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
      * Reset the existing batch.
      */
     public void batchReset() {
-        if (!this.batchEnabled)
-            throw new UnsupportedOperationException("cannot reset batch when batch is not enabled, call setBachEnabled(true) first");
         this.items.clear();
         this.items.putAll(this.clientItems);
     }
@@ -92,8 +88,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     public void setBatchEnabled(boolean batchEnabled) {
         if (this.batchEnabled == batchEnabled)
             return;
-        if (this.batchEnabled && !this.clientItems.equals(this.items))
-            throw new RuntimeException("cannot disable batch before batchUpdate() called");
         this.batchEnabled = batchEnabled;
         this.clientItems.clear();
 

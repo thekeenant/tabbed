@@ -1,0 +1,6 @@
+ name: Tabbed
+ version: 1.7
+ description: This plugin provides the "Tabbed" library which is necessary for some plugins.
+ authors: [Keenan Thompson]
+ website: https://github.com/thekeenant/tabbed
+ main: com.keenant.tabbed.TabbedPlugin

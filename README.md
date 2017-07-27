@@ -1,5 +1,9 @@
 # Tabbed
 
+[![Build Status](https://travis-ci.org/thekeenant/tabbed.svg?branch=master)](https://travis-ci.org/thekeenant/tabbed)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d18390d22764a86bb77dc65208319d5)](https://www.codacy.com/app/thekeenant/tabbed?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=thekeenant/tabbed&amp;utm_campaign=Badge_Grade)
+[![SpigotMC](https://img.shields.io/badge/SpigotMC-100%2B%20downloads-yellow.svg)](https://www.spigotmc.org/resources/tabbed.18871/)
+
 Tabbed is a Bukkit API for configuring the tablist to the desire of any plugin developer! Make tab lists the
 way in which you always desired.
 

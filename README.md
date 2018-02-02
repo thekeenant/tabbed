@@ -2,13 +2,13 @@
 
 [![Build Status](https://travis-ci.org/thekeenant/tabbed.svg?branch=master)](https://travis-ci.org/thekeenant/tabbed)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d18390d22764a86bb77dc65208319d5)](https://www.codacy.com/app/thekeenant/tabbed?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=thekeenant/tabbed&amp;utm_campaign=Badge_Grade)
-[![SpigotMC](https://img.shields.io/badge/SpigotMC-100%2B%20downloads-yellow.svg)](https://www.spigotmc.org/resources/tabbed.18871/)
+[![SpigotMC](https://img.shields.io/badge/SpigotMC-250%20downloads-yellow.svg)](https://www.spigotmc.org/resources/tabbed.18871/)
 
 Tabbed is a Bukkit API for configuring the tablist to the desire of any plugin developer! Make tab lists the
 way in which you always desired.
 
 **Dependencies:**
-* Any derivative of Bukkit 1.8 or 1.9 ([PaperSpigot!](https://tcpr.ca/downloads/paperspigot))
+* Any derivative of Bukkit 1.8 or 1.9
 * [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/)
 
 **Demonstration:**
@@ -17,14 +17,9 @@ way in which you always desired.
 
 ## Maven
 
-```xml
-<repositories>
-    <repository>
-        <id>avicus-public</id>
-        <url>https://repo.avicus.net/content/groups/public/</url>
-    </repository>
-</repositories>
+There is currently no repository, so you will have to download tabbed and `mvn install` it to your local Maven repository in order to add it as a dependency:
 
+```xml
 <dependencies>
     <dependency>
         <groupId>com.keenant</groupId>

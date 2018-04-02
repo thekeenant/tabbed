@@ -15,19 +15,27 @@ way in which you always desired.
 
 ![http://i.imgur.com/hbO4Nbq.gif](http://i.imgur.com/hbO4Nbq.gif)
 
-## Maven
+## Maven/Gradle
 
-There is currently no repository, so you will have to download tabbed and `mvn install` it to your local Maven repository in order to add it as a dependency:
+See: [Jitpack](https://jitpack.io/#thekeenant/tabbed/v1.8) for specifics.
 
 ```xml
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+
 <dependencies>
-    <dependency>
-        <groupId>com.keenant</groupId>
-        <artifactId>tabbed</artifactId>
-        <version>1.7-SNAPSHOT</version>
-    </dependency>
+  <dependency>
+    <groupId>com.github.thekeenant</groupId>
+    <artifactId>tabbed</artifactId>
+    <version>v1.8</version>
+  </dependency>
 </dependencies>
 ```
+
 
 ## Usage
 **Create Tabbed for your plugin:**

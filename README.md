@@ -4,8 +4,10 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d18390d22764a86bb77dc65208319d5)](https://www.codacy.com/app/thekeenant/tabbed?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=thekeenant/tabbed&amp;utm_campaign=Badge_Grade)
 [![SpigotMC](https://img.shields.io/badge/SpigotMC-250%20downloads-yellow.svg)](https://www.spigotmc.org/resources/tabbed.18871/)
 
-Tabbed is a Bukkit API for configuring the tablist to the desire of any plugin developer! Make tab lists the
-way in which you always desired.
+Tabbed is a Bukkit API for configuring the tablist for your users. Each slot is configurable: set the icon, ping, and text
+for each tab list item to your liking.
+
+**This library is not actively maintained, but if you are interested in contributing, go right ahead!**
 
 **Dependencies:**
 * Any derivative of Bukkit 1.8 or 1.9

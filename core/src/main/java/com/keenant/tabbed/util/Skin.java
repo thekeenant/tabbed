@@ -13,13 +13,14 @@ import java.util.Objects;
 @ToString
 public class Skin {
     @Getter private final WrappedSignedProperty property;
+    public static final String TEXTURE_KEY = "textures";
 
     public Skin(String value, String signature) {
-        this(new WrappedSignedProperty("textures", value, signature));
+        this(new WrappedSignedProperty(TEXTURE_KEY, value, signature));
     }
 
     public Skin(WrappedSignedProperty property) {
-        Preconditions.checkArgument(property.getName().equals("textures"));
+        Preconditions.checkArgument(property.getName().equals(TEXTURE_KEY));
         this.property = property;
     }
 

@@ -155,7 +155,7 @@ public class Skins {
      */
     public static Skin getPlayer(Player player) {
         WrappedSignedProperty property = DEFAULT_SKIN.getProperty();
-        Collection<WrappedSignedProperty> properties = WrappedGameProfile.fromPlayer(player).getProperties().get("textures");
+        Collection<WrappedSignedProperty> properties = WrappedGameProfile.fromPlayer(player).getProperties().get(Skin.TEXTURE_KEY);
         if (properties != null && properties.size() > 0)
             property = properties.iterator().next();
         return new Skin(property);
@@ -208,7 +208,7 @@ public class Skins {
             String name = (String) jsonObject.get("name");
             String value = (String) jsonObject.get("value");
             String signature = (String) jsonObject.get("signature");
-            if (name.equals("textures"))
+            if (name.equals(Skin.TEXTURE_KEY))
                 property = new WrappedSignedProperty(name, value, signature);
         }
 

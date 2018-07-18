@@ -10,6 +10,8 @@ import com.google.common.base.Preconditions;
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.util.Packets;
+import com.keenant.tabbed.util.Skin;
+import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.entity.Player;
@@ -34,7 +36,7 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     @Getter boolean batchEnabled;
     private final Map<Integer,TabItem> clientItems;
 
-    private static final Map<Integer, WrappedGameProfile> PROFILE_INDEX_CACHE = new HashMap<>();
+    private static final Map<Skin, Map<Integer, WrappedGameProfile>> PROFILE_INDEX_CACHE = new HashMap<>();
 
     public SimpleTabList(Tabbed tabbed, Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
         super(player);
@@ -293,14 +295,20 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     }
 
     private WrappedGameProfile getGameProfile(int index, TabItem item) {
-        if (!PROFILE_INDEX_CACHE.containsKey(index)) { // Profile is not cached, generate and cache one.
-            String name = String.format("%03d", index) + "|UpdateMC";
+        Skin skin = item.getSkin();
+        if (!PROFILE_INDEX_CACHE.containsKey(skin)) // Cached by skins, so if you change the skins a lot, it still works while being efficient.
+            PROFILE_INDEX_CACHE.put(skin, new HashMap<>());
+        Map<Integer, WrappedGameProfile> indexCache = PROFILE_INDEX_CACHE.get(skin);
+
+        if (!indexCache.containsKey(index)) { // Profile is not cached, generate and cache one.
+            String name = String.format("%03d", index) + "|UpdateMC"; // Starts with 00 so they are sorted in alphabetical order and appear in the right order.
             UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
-            PROFILE_INDEX_CACHE.put(index, new WrappedGameProfile(uuid, name));
+
+            WrappedGameProfile profile = new WrappedGameProfile(uuid, name); // Create a profile to cache by skin and index.
+            profile.getProperties().put(Skin.TEXTURE_KEY, item.getSkin().getProperty());
+            indexCache.put(index, profile); // Cache the profile.
         }
 
-        WrappedGameProfile profile = PROFILE_INDEX_CACHE.get(index);
-        profile.getProperties().put("textures", item.getSkin().getProperty());
-        return profile;
+        return indexCache.get(index);
     }
 }

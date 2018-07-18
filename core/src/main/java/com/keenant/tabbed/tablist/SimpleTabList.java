@@ -226,57 +226,36 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         Packets.send(this.player, getUpdate(oldItems, newItems));
     }
 
-    private List<PacketContainer> getUpdate(int index, TabItem oldItem, TabItem newItem) {
-        if (newItem == null && oldItem != null)
-            return Collections.singletonList(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(index, oldItem)));
-
-        List<PacketContainer> packets = new ArrayList<>(2);
-
-        boolean skinChanged = oldItem == null || newItem.updateSkin() || !newItem.getSkin().equals(oldItem.getSkin());
-        boolean textChanged = oldItem == null || newItem.updateText() || !newItem.getText().equals(oldItem.getText());
-        boolean pingChanged = oldItem == null || newItem.updatePing() || oldItem.getPing() != newItem.getPing();
-
-        if (skinChanged) {
-            if (oldItem != null)
-                packets.add(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(index, oldItem)));
-            packets.add(Packets.getPacket(PlayerInfoAction.ADD_PLAYER, getPlayerInfoData(index, newItem)));
-        }
-        else {
-            if (pingChanged)
-                packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_LATENCY, getPlayerInfoData(index, newItem)));
-        }
-
-        packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_DISPLAY_NAME, getPlayerInfoData(index, newItem)));
-
-       // if (packets.size() > 0) {
-       //     Tabbed.log(Level.INFO, "Packet Update Made:");
-       //     Tabbed.log(Level.INFO, "  @" + index);
-       //     Tabbed.log(Level.INFO, "  (" + skinChanged + "/" + textChanged + "/" + pingChanged + " = " + packets.size() + " packets");
-       // }
-
-        return packets;
-    }
-
-    private List<PacketContainer> getUpdate(Map<Integer,TabItem> oldItems, Map<Integer,TabItem> items) {
-        List<PacketContainer> all = new ArrayList<>(items.size() * 2);
-
-        for (Entry<Integer,TabItem> entry : items.entrySet())
-            all.addAll(getUpdate(entry.getKey(), oldItems.get(entry.getKey()), entry.getValue()));
-
+    private List<PacketContainer> getUpdate(Map<Integer,TabItem> oldItems, Map<Integer,TabItem> newItems) {
         List<PlayerInfoData> removePlayer = new ArrayList<>();
         List<PlayerInfoData> addPlayer = new ArrayList<>();
         List<PlayerInfoData> displayChanged = new ArrayList<>();
-        List<PlayerInfoData> pingChanged = new ArrayList<>();
+        List<PlayerInfoData> pingUpdated = new ArrayList<>();
 
-        for (PacketContainer packet : all) {
-            if (packet.getPlayerInfoAction().read(0) == PlayerInfoAction.REMOVE_PLAYER)
-                removePlayer.addAll(packet.getPlayerInfoDataLists().read(0));
-            if (packet.getPlayerInfoAction().read(0) == PlayerInfoAction.ADD_PLAYER)
-                addPlayer.addAll(packet.getPlayerInfoDataLists().read(0));
-            if (packet.getPlayerInfoAction().read(0) == PlayerInfoAction.UPDATE_DISPLAY_NAME)
-                displayChanged.addAll(packet.getPlayerInfoDataLists().read(0));
-            if (packet.getPlayerInfoAction().read(0) == PlayerInfoAction.UPDATE_LATENCY)
-                pingChanged.addAll(packet.getPlayerInfoDataLists().read(0));
+        for (Entry<Integer, TabItem> entry : newItems.entrySet()) {
+            int index = entry.getKey();
+            TabItem oldItem = oldItems.get(index);
+            TabItem newItem = entry.getValue();
+
+            if (newItem == null && oldItem != null) { // TabItem has been removed.
+                removePlayer.add(getPlayerInfoData(index, oldItem));
+                continue;
+            }
+
+            boolean skinChanged = oldItem == null || newItem.updateSkin() || !newItem.getSkin().equals(oldItem.getSkin());
+            boolean textChanged = oldItem == null || newItem.updateText() || !newItem.getText().equals(oldItem.getText());
+            boolean pingChanged = oldItem == null || newItem.updatePing() || oldItem.getPing() != newItem.getPing();
+
+            if (skinChanged) {
+                if (oldItem != null)
+                    removePlayer.add(getPlayerInfoData(index, oldItem));
+                addPlayer.add(getPlayerInfoData(index, newItem));
+            } else if (pingChanged) {
+                pingUpdated.add(getPlayerInfoData(index, newItem));
+            }
+
+            if (textChanged)
+                displayChanged.add(getPlayerInfoData(index, newItem));
         }
 
         List<PacketContainer> result = new ArrayList<>(4);
@@ -287,9 +266,8 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         }
         if (displayChanged.size() > 0)
             result.add(Packets.getPacket(PlayerInfoAction.UPDATE_DISPLAY_NAME, displayChanged));
-        if (pingChanged.size() > 0)
-            result.add(Packets.getPacket(PlayerInfoAction.UPDATE_LATENCY, pingChanged));
-
+        if (pingUpdated.size() > 0)
+            result.add(Packets.getPacket(PlayerInfoAction.UPDATE_LATENCY, pingUpdated));
 
         return result;
     }
@@ -320,7 +298,6 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
             UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
             PROFILE_INDEX_CACHE.put(index, new WrappedGameProfile(uuid, name));
         }
-
 
         WrappedGameProfile profile = PROFILE_INDEX_CACHE.get(index);
         profile.getProperties().put("textures", item.getSkin().getProperty());

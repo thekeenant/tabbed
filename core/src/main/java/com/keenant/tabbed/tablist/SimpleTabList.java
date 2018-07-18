@@ -34,6 +34,8 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     @Getter boolean batchEnabled;
     private final Map<Integer,TabItem> clientItems;
 
+    private static final Map<Integer, WrappedGameProfile> PROFILE_INDEX_CACHE = new HashMap<>();
+
     public SimpleTabList(Tabbed tabbed, Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
         super(player);
         Preconditions.checkArgument(maxItems <= MAXIMUM_ITEMS, "maxItems cannot exceed client maximum of " + MAXIMUM_ITEMS);
@@ -313,15 +315,15 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     }
 
     private WrappedGameProfile getGameProfile(int index, TabItem item) {
-        String name = getStringIndex(index);
-        UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
+        if (!PROFILE_INDEX_CACHE.containsKey(index)) { // Profile is not cached, generate and cache one.
+            String name = String.format("%03d", index) + "|UpdateMC";
+            UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
+            PROFILE_INDEX_CACHE.put(index, new WrappedGameProfile(uuid, name));
+        }
 
-        WrappedGameProfile profile = new WrappedGameProfile(uuid, name + "|UpdateMC");
+
+        WrappedGameProfile profile = PROFILE_INDEX_CACHE.get(index);
         profile.getProperties().put("textures", item.getSkin().getProperty());
         return profile;
-    }
-
-    private String getStringIndex(int index) {
-        return String.format("%03d", index);
     }
 }

@@ -10,6 +10,8 @@ import com.google.common.base.Preconditions;
 import com.keenant.tabbed.Tabbed;
 import com.keenant.tabbed.item.TabItem;
 import com.keenant.tabbed.util.Packets;
+import com.keenant.tabbed.util.Skin;
+import com.keenant.tabbed.util.Skins;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.entity.Player;
@@ -33,6 +35,8 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
 
     @Getter boolean batchEnabled;
     private final Map<Integer,TabItem> clientItems;
+
+    private static final Map<Skin, Map<Integer, WrappedGameProfile>> PROFILE_INDEX_CACHE = new HashMap<>();
 
     public SimpleTabList(Tabbed tabbed, Player player, int maxItems, int minColumnWidth, int maxColumnWidth) {
         super(player);
@@ -224,57 +228,36 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         Packets.send(this.player, getUpdate(oldItems, newItems));
     }
 
-    private List<PacketContainer> getUpdate(int index, TabItem oldItem, TabItem newItem) {
-        if (newItem == null && oldItem != null)
-            return Collections.singletonList(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(index, oldItem)));
-
-        List<PacketContainer> packets = new ArrayList<>(2);
-
-        boolean skinChanged = oldItem == null || newItem.updateSkin() || !newItem.getSkin().equals(oldItem.getSkin());
-        boolean textChanged = oldItem == null || newItem.updateText() || !newItem.getText().equals(oldItem.getText());
-        boolean pingChanged = oldItem == null || newItem.updatePing() || oldItem.getPing() != newItem.getPing();
-
-        if (skinChanged) {
-            if (oldItem != null)
-                packets.add(Packets.getPacket(PlayerInfoAction.REMOVE_PLAYER, getPlayerInfoData(index, oldItem)));
-            packets.add(Packets.getPacket(PlayerInfoAction.ADD_PLAYER, getPlayerInfoData(index, newItem)));
-        }
-        else {
-            if (pingChanged)
-                packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_LATENCY, getPlayerInfoData(index, newItem)));
-        }
-
-        packets.add(Packets.getPacket(PlayerInfoAction.UPDATE_DISPLAY_NAME, getPlayerInfoData(index, newItem)));
-
-       // if (packets.size() > 0) {
-       //     Tabbed.log(Level.INFO, "Packet Update Made:");
-       //     Tabbed.log(Level.INFO, "  @" + index);
-       //     Tabbed.log(Level.INFO, "  (" + skinChanged + "/" + textChanged + "/" + pingChanged + " = " + packets.size() + " packets");
-       // }
-
-        return packets;
-    }
-
-    private List<PacketContainer> getUpdate(Map<Integer,TabItem> oldItems, Map<Integer,TabItem> items) {
-        List<PacketContainer> all = new ArrayList<>(items.size() * 2);
-
-        for (Entry<Integer,TabItem> entry : items.entrySet())
-            all.addAll(getUpdate(entry.getKey(), oldItems.get(entry.getKey()), entry.getValue()));
-
+    private List<PacketContainer> getUpdate(Map<Integer,TabItem> oldItems, Map<Integer,TabItem> newItems) {
         List<PlayerInfoData> removePlayer = new ArrayList<>();
         List<PlayerInfoData> addPlayer = new ArrayList<>();
         List<PlayerInfoData> displayChanged = new ArrayList<>();
-        List<PlayerInfoData> pingChanged = new ArrayList<>();
+        List<PlayerInfoData> pingUpdated = new ArrayList<>();
 
-        for (PacketContainer packet : all) {
-            if (packet.getPlayerInfoAction().read(0) == PlayerInfoAction.REMOVE_PLAYER)
-                removePlayer.addAll(packet.getPlayerInfoDataLists().read(0));
-            if (packet.getPlayerInfoAction().read(0) == PlayerInfoAction.ADD_PLAYER)
-                addPlayer.addAll(packet.getPlayerInfoDataLists().read(0));
-            if (packet.getPlayerInfoAction().read(0) == PlayerInfoAction.UPDATE_DISPLAY_NAME)
-                displayChanged.addAll(packet.getPlayerInfoDataLists().read(0));
-            if (packet.getPlayerInfoAction().read(0) == PlayerInfoAction.UPDATE_LATENCY)
-                pingChanged.addAll(packet.getPlayerInfoDataLists().read(0));
+        for (Entry<Integer, TabItem> entry : newItems.entrySet()) {
+            int index = entry.getKey();
+            TabItem oldItem = oldItems.get(index);
+            TabItem newItem = entry.getValue();
+
+            if (newItem == null && oldItem != null) { // TabItem has been removed.
+                removePlayer.add(getPlayerInfoData(index, oldItem));
+                continue;
+            }
+
+            boolean skinChanged = oldItem == null || newItem.updateSkin() || !newItem.getSkin().equals(oldItem.getSkin());
+            boolean textChanged = oldItem == null || newItem.updateText() || !newItem.getText().equals(oldItem.getText());
+            boolean pingChanged = oldItem == null || newItem.updatePing() || oldItem.getPing() != newItem.getPing();
+
+            if (skinChanged) {
+                if (oldItem != null)
+                    removePlayer.add(getPlayerInfoData(index, oldItem));
+                addPlayer.add(getPlayerInfoData(index, newItem));
+            } else if (pingChanged) {
+                pingUpdated.add(getPlayerInfoData(index, newItem));
+            }
+
+            if (textChanged)
+                displayChanged.add(getPlayerInfoData(index, newItem));
         }
 
         List<PacketContainer> result = new ArrayList<>(4);
@@ -285,9 +268,8 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
         }
         if (displayChanged.size() > 0)
             result.add(Packets.getPacket(PlayerInfoAction.UPDATE_DISPLAY_NAME, displayChanged));
-        if (pingChanged.size() > 0)
-            result.add(Packets.getPacket(PlayerInfoAction.UPDATE_LATENCY, pingChanged));
-
+        if (pingUpdated.size() > 0)
+            result.add(Packets.getPacket(PlayerInfoAction.UPDATE_LATENCY, pingUpdated));
 
         return result;
     }
@@ -313,15 +295,20 @@ public class SimpleTabList extends TitledTabList implements CustomTabList {
     }
 
     private WrappedGameProfile getGameProfile(int index, TabItem item) {
-        String name = getStringIndex(index);
-        UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
+        Skin skin = item.getSkin();
+        if (!PROFILE_INDEX_CACHE.containsKey(skin)) // Cached by skins, so if you change the skins a lot, it still works while being efficient.
+            PROFILE_INDEX_CACHE.put(skin, new HashMap<>());
+        Map<Integer, WrappedGameProfile> indexCache = PROFILE_INDEX_CACHE.get(skin);
 
-        WrappedGameProfile profile = new WrappedGameProfile(uuid, name + "|UpdateMC");
-        profile.getProperties().put("textures", item.getSkin().getProperty());
-        return profile;
-    }
+        if (!indexCache.containsKey(index)) { // Profile is not cached, generate and cache one.
+            String name = String.format("%03d", index) + "|UpdateMC"; // Starts with 00 so they are sorted in alphabetical order and appear in the right order.
+            UUID uuid = UUID.nameUUIDFromBytes(name.getBytes());
 
-    private String getStringIndex(int index) {
-        return String.format("%03d", index);
+            WrappedGameProfile profile = new WrappedGameProfile(uuid, name); // Create a profile to cache by skin and index.
+            profile.getProperties().put(Skin.TEXTURE_KEY, item.getSkin().getProperty());
+            indexCache.put(index, profile); // Cache the profile.
+        }
+
+        return indexCache.get(index);
     }
 }

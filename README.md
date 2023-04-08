@@ -82,6 +82,29 @@ new TextTabItem("An Enderman!", 0, Skins.getMob(EntityType.ENDERMAN));
 new BlankTabItem(Skins.getSkin(ChatColor.RED);
 ```
 
+### Custom skin heads
+
+To be able to use your custom skin's head you will need a few things.
+* The texture value and the texture signature
+* The skin with the head you want (a player skin)
+
+To get the texture value or signature you can use https://mineskin.org, it will give you the texutre value and signature.
+You can also get a player's skin texture value and signature using Mojang's session servers (https://sessionserver.mojang.com/session/minecraft/profile/PLAYER-UUID-HERE?unsigned=false)
+
+**Constructor:**
+```java
+Skin = new Skin("Texture value here", "Texture signature here");
+```
+
+**Usage:**
+```java
+// The custom head using texture value and signature
+Skin SPEECH_BUBBLE_CHAT = new Skin("ewogICJ0aW1lc3RhbXAiIDogMTY3MjYxMTE5OTc3MCwKICAicHJvZmlsZUlkIiA6ICJhNTkyMjkwNDVjMjI0MGUyOTM0ZjMxZWFjMzNiY2IzNSIsCiAgInByb2ZpbGVOYW1lIiA6ICJTbHVnRGVhbGVyQWdhaW4iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGQ2NDVhZGFkOWRlMDgyNDc5NTVkN2UwYjc3MWJiMWY4MjZmOTI1MWY2ZTA5MTNmYmJjNjdhODAxYzJjMTU0ZSIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9", "dZKZoFGwqs7WQ2zhQNiN8UEMRVdRNOr1kzhYBVGutOledr7VmxGCIfKNNil4Gs/zmm8+/jCZPvJn0/39XAUVuCGw6Mhr4+2Vatz1ivpC9JfT4Czs8op9JsVcYZ/pLh5j/CxpgQ3/xn3tYuw09aHwZPDZW+FXt8zMYKNzrXiBQrD2jGYe9FHSWmwghYSHAx7DVbg20B5ajpvGejMzvA2PBSQFe7YX/7umpnIXrst8LcDP6EdhlmNgBZ3x51H88cn9QqctXjPVwweW81B0ufHOTrbncAGFgCUykfny0dlcYYdiulm0dTNcSFAEzqbqNfNN6+XveEiss+POyQt+g6Vr9kfMokgk51x+gtBHnre7MAHBTfcANR5A1PMfQOrFJUCFt42MXYp2Y3iHtYAho86jOlKs/nX2rSS9uOJ5ov70aIYyNNe+5w4kll5tZmaaE16fqCY0oKOICzAzOWe12tOFPTlpLyM1+2UBdwGjMUaJmzG6X0YiS8JvH73HuAmVM/wQuZ/WRBnOEvcqZjUPyqkCvP3vNIqecPeXZvdDz7IJJ0Q2/iRZdE4m/mnbvItcpeZvCQeH058AHqGpYY7Ei0SwdU568EasShYwoOqgruC0NP2O7dAo/pQjEQiEZnGViDUFUaz0bbXpIvnDuBW+eyuEenWAN4ASVgtNSoy/F6093Bo=");
+
+TitledTabList tab = tabbed.newTitledTabList(player);
+tab.set(0, 0, new TextTabItem("Custom head!", 0, SPEECH_BUBBLE_CHAT));
+```
+
 ### Things to know!
 
 * Tab lists are associated per player. This means you must create a new tab list every time a user joins (`PlayerJoinEvent` works just fine).
